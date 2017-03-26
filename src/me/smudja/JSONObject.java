@@ -147,28 +147,5 @@ public class JSONObject {
 	public String getMessage() {
 		return message;
 	}
-	
-//	{
-//		"ok":true,
-//		"result":[{
-//		        	  "update_id":145981277,
-//		        	  "message":{
-//		        	  		"message_id":14,
-//		        	  		"from":{
-//		        	  			"id":105604450,
-//		        	  			"first_name":"Smudja \ud83c\udd92\ud83c\udd93\ud83c\udd95",
-//		        	  			"username":"Smudja"
-//		        	  			},
-//		        	  		"chat":{
-//		        	  				"id":105604450,
-//		        	  				"first_name":"Smudja \ud83c\udd92\ud83c\udd93\ud83c\udd95",
-//		        	  				"username":"Smudja",
-//		        	  				"type":"private"
-//		        	  			},
-//		        	  		"date":1490556866,
-//		        	  		"text":"Hey hey"
-//		        		}
-//		          }]
-//	}
 
 }
