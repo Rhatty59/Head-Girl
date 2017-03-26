@@ -3,16 +3,17 @@
  */
 package me.smudja;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Scanner;
+import java.text.DateFormat;
 
 /**
  * @author smithl
@@ -47,11 +48,11 @@ public class HeadGirl {
 	private void getUpdates() {
 		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 		
-		int offset = 145981276;
+		int offset = 145981290;
 		
 		int limit = 1;
 		
-		int timeout = 10;
+		int timeout = 2;
 		
 		String[] allowed_updates = {"message"};
 		
@@ -74,13 +75,29 @@ public class HeadGirl {
 		
 		try {
 			URLConnection connection = new URL(url + "getUpdates?" + query).openConnection();
-			InputStream response = connection.getInputStream();
-			try (Scanner scanner = new Scanner(response)) {
-			    String responseBody = URLDecoder.decode(scanner.useDelimiter("\\A").next(), charset);
-			    System.out.println(responseBody);
+			InputStream responseStream = connection.getInputStream();
+			BufferedReader streamReader = new BufferedReader(new InputStreamReader(responseStream, charset)); 
+			StringBuilder responseStrBuilder = new StringBuilder();
+
+			String inputStr;
+			while ((inputStr = streamReader.readLine()) != null)
+			    responseStrBuilder.append(inputStr);
+			JSONObject response = new JSONObject(responseStrBuilder.toString());
+			if(!response.ok()) {
+				System.out.println("ERROR: Could not check for updates");
 			}
-		} catch (IOException exc) {
-			exc.printStackTrace();
+			else if(!response.updated()) {
+				System.out.println("No updates yet...");
+			}
+			else {
+				System.out.println("Update ID: " + response.getUpdateId());
+				System.out.println("[" + response.getFirstName() + "] " + response.getMessage());
+				System.out.println("Received: " + DateFormat.getInstance().format(response.getDate()));
+			}
+		} catch (IOException ioExc) {
+			ioExc.printStackTrace();
+		} catch (JSONFormatException jsonExc) {
+			jsonExc.printStackTrace();
 		}
 	}
 			
