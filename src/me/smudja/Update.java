@@ -3,6 +3,8 @@
  */
 package me.smudja;
 
+import static org.apache.commons.lang3.StringEscapeUtils.unescapeJava;
+
 import java.time.Instant;
 import java.util.Date;
 
@@ -10,7 +12,7 @@ import java.util.Date;
  * @author smithl
  *
  */
-public class JSONObject {
+public class Update {
 	
 	private boolean updated;
 	
@@ -24,12 +26,15 @@ public class JSONObject {
 	
 	private String message;
 	
-	public JSONObject(String input) throws JSONFormatException {		
+	public Update(String input) throws JSONFormatException {		
 		
 		this.checkOk(input);
-		this.checkUpdated(input);
+		if(!ok) {
+			return;
+		}
 		
-		if(updated == false || ok == false) {
+		this.checkUpdated(input);
+		if(!updated) {
 			return;
 		}
 		
@@ -116,12 +121,11 @@ public class JSONObject {
 			throw new JSONFormatException();
 		}
 		StringBuilder msgBldr = new StringBuilder();
-		while(input.charAt(idxMsg) != '"') {
-		// TODO breaks if user sends " (this appears as \" so maybe check for this as opposed to "
+		while(!(input.charAt(idxMsg) == '"' && input.charAt(idxMsg - 1) != '\\')) {
 			msgBldr.append(input.charAt(idxMsg));
 			idxMsg++;
 		}
-		message = msgBldr.toString();
+		message = unescapeJava(msgBldr.toString());
 	}
 	
 	public boolean updated() {

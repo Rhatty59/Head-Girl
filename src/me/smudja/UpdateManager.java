@@ -14,12 +14,15 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.DateFormat;
+import java.util.ArrayList;
 
 /**
  * @author smithl
  *
  */
-public class HeadGirl {
+public enum UpdateManager {
+	
+	INSTANCE;
 	
 	/**
 	 * token - the telegram bot token
@@ -30,32 +33,44 @@ public class HeadGirl {
 	 * url - the base url for executing commands
 	 */
 	private String url;
+	
+	String charset = java.nio.charset.StandardCharsets.UTF_8.name();
+	
+	int offset = 0;
+	
+	int limit = 1;
+	
+	int timeout = 2;
+	
+	String[] allowed_updates = {"message"};
 
 	/**
 	 * constructor
 	 */
-	public HeadGirl() {
+	private UpdateManager() {
 		try {
 			token = new String(Files.readAllBytes(Paths.get("token"))).trim();
-			url = "https://api.telegram.org/bot" + URLEncoder.encode(token) + "/";
-			// TODO encode token with correct encoding
+			url = "https://api.telegram.org/bot" + URLEncoder.encode(token, charset) + "/";
 		}
 		catch(IOException exc) {
 			exc.printStackTrace();
 		}
 	}
 	
-	private void getUpdates() {
-		String charset = java.nio.charset.StandardCharsets.UTF_8.name();
-		
-		int offset = 145981290;
-		
-		int limit = 1;
-		
-		int timeout = 2;
-		
-		String[] allowed_updates = {"message"};
-		
+	private Update[] getUpdates() {
+		ArrayList<Update> updatesList = new ArrayList<Update>();
+		Update update;
+		do {
+			update = getUpdate();
+			if(update.updated()) {
+				updatesList.add(update);
+			}
+		} while(update.updated());
+		Update[] updates = new Update[]{};
+		return updatesList.toArray(updates);
+	}
+	
+	private Update getUpdate() {
 		String query;
 		try {
 			query = String.format("%s=%s&%s=%s&%s=%s&%s=%s",
@@ -70,7 +85,7 @@ public class HeadGirl {
 					);
 		} catch (UnsupportedEncodingException exc) {
 			exc.printStackTrace();
-			query = "";
+			return null;
 		}
 		
 		try {
@@ -82,22 +97,17 @@ public class HeadGirl {
 			String inputStr;
 			while ((inputStr = streamReader.readLine()) != null)
 			    responseStrBuilder.append(inputStr);
-			JSONObject response = new JSONObject(responseStrBuilder.toString());
-			if(!response.ok()) {
-				System.out.println("ERROR: Could not check for updates");
+			Update response = new Update(responseStrBuilder.toString());
+			if(response.ok() && response.updated()) {
+				offset = response.getUpdateId() + 1;
 			}
-			else if(!response.updated()) {
-				System.out.println("No updates yet...");
-			}
-			else {
-				System.out.println("Update ID: " + response.getUpdateId());
-				System.out.println("[" + response.getFirstName() + "] " + response.getMessage());
-				System.out.println("Received: " + DateFormat.getInstance().format(response.getDate()));
-			}
+			return response;
 		} catch (IOException ioExc) {
 			ioExc.printStackTrace();
+			return null;
 		} catch (JSONFormatException jsonExc) {
 			jsonExc.printStackTrace();
+			return null;
 		}
 	}
 			
@@ -106,8 +116,15 @@ public class HeadGirl {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		HeadGirl headGirl = new HeadGirl();
-		headGirl.getUpdates();
+		Update[] updates = UpdateManager.INSTANCE.getUpdates();
+		for(Update update : updates) {
+			System.out.println("Update ID: " + update.getUpdateId());
+			System.out.println("[" + update.getFirstName() + "] " + update.getMessage());
+			System.out.println("Received: " + DateFormat.getInstance().format(update.getDate()));
+		}
+		if(updates.length == 0) {
+			System.out.println("No Updates...");
+		}
 	}
 
 }
