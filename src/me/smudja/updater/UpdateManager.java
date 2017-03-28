@@ -1,7 +1,7 @@
 /**
  * 
  */
-package me.smudja;
+package me.smudja.updater;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,7 +13,6 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.util.ArrayList;
 
 /**
@@ -40,7 +39,7 @@ public enum UpdateManager {
 	
 	int limit = 1;
 	
-	int timeout = 2;
+	int timeout = 1;
 	
 	String[] allowed_updates = {"message"};
 
@@ -57,7 +56,7 @@ public enum UpdateManager {
 		}
 	}
 	
-	private Update[] getUpdates() {
+	public Update[] getUpdates() {
 		ArrayList<Update> updatesList = new ArrayList<Update>();
 		Update update;
 		do {
@@ -110,21 +109,4 @@ public enum UpdateManager {
 			return null;
 		}
 	}
-			
-			
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Update[] updates = UpdateManager.INSTANCE.getUpdates();
-		for(Update update : updates) {
-			System.out.println("Update ID: " + update.getUpdateId());
-			System.out.println("[" + update.getFirstName() + "] " + update.getMessage());
-			System.out.println("Received: " + DateFormat.getInstance().format(update.getDate()));
-		}
-		if(updates.length == 0) {
-			System.out.println("No Updates...");
-		}
-	}
-
 }

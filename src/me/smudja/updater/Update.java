@@ -1,7 +1,7 @@
 /**
  * 
  */
-package me.smudja;
+package me.smudja.updater;
 
 import static org.apache.commons.lang3.StringEscapeUtils.unescapeJava;
 
@@ -26,7 +26,7 @@ public class Update {
 	
 	private String message;
 	
-	public Update(String input) throws JSONFormatException {		
+	protected Update(String input) throws JSONFormatException {		
 		
 		this.checkOk(input);
 		if(!ok) {
