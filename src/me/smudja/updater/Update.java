@@ -12,6 +12,9 @@ import java.util.Date;
  * @author smithl
  *
  */
+/* TODO Fix the way this class reads in the response. Errors can occur when usernames/messages contain the
+ * 		text that the methods are searching for!
+ */
 public class Update {
 	
 	private boolean updated;
@@ -103,7 +106,7 @@ public class Update {
 	}
 	
 	private void getDateReceived(String input) throws JSONFormatException {
-		int idxDate = input.lastIndexOf("date") + 6;
+		int idxDate = input.indexOf("\"date\"") + 7;
 		if(idxDate == -1) {
 			throw new JSONFormatException();
 		}
@@ -116,7 +119,7 @@ public class Update {
 	}
 	
 	private void getMessage(String input) throws JSONFormatException {
-		int idxMsg = input.lastIndexOf("text") + 7;
+		int idxMsg = input.indexOf("\"text\"") + 8;
 		if(idxMsg == -1) {
 			throw new JSONFormatException();
 		}
