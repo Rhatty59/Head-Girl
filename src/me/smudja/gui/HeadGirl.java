@@ -40,7 +40,7 @@ public class HeadGirl extends Application {
 			textBuilder.append("Update ID: " + update.getUpdateId() + "\n");
 			textBuilder.append("[" + update.getFirstName() + "] " + update.getMessage() + "\n");
 			textBuilder.append("Received: " + DateFormat.getInstance().format(update.getDate()) + "\n");
-			System.out.println();
+			textBuilder.append("\n");
 		}
 		if(textBuilder.length() == 0) {
 			text = "No Updates To Display...";
@@ -52,6 +52,7 @@ public class HeadGirl extends Application {
 		TextArea display = new TextArea(text);
 		display.setEditable(false);
 		display.setPrefSize(1200, 600);
+		// google "using css in javafx" to find out how to edit the text in an easy way!
 		
 		rootNode.getChildren().add(display);
 		

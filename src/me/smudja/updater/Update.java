@@ -13,7 +13,7 @@ import java.util.Date;
  *
  */
 /* TODO Fix the way this class reads in the response. Errors can occur when usernames/messages contain the
- * 		text that the methods are searching for!
+ * 		text that the methods are searching for! Look at org json simple 1.1.jar
  */
 public class Update {
 	
