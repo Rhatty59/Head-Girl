@@ -38,7 +38,7 @@ public class HeadGirl extends Application {
 		StringBuilder textBuilder = new StringBuilder();
 		for(Update update : UpdateManager.INSTANCE.getUpdates()) {
 			textBuilder.append("Update ID: " + update.getUpdateId() + "\n");
-			textBuilder.append("[" + update.getFirstName() + "] " + update.getMessage() + "\n");
+			textBuilder.append("[" + update.getFirstName() + "] " + update.getText() + "\n");
 			textBuilder.append("Received: " + DateFormat.getInstance().format(update.getDate()) + "\n");
 			textBuilder.append("\n");
 		}

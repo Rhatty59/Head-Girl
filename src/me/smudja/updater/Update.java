@@ -8,127 +8,60 @@ import static org.apache.commons.lang3.StringEscapeUtils.unescapeJava;
 import java.time.Instant;
 import java.util.Date;
 
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
+
 /**
  * @author smithl
  *
  */
-/* TODO Fix the way this class reads in the response. Errors can occur when usernames/messages contain the
- * 		text that the methods are searching for! Look at org json simple 1.1.jar
- */
 public class Update {
+	
+	private JSONParser parser;
+	
+	private JSONObject response;
+	
+	private JSONObject message;
 	
 	private boolean updated;
 	
 	private boolean ok;
 	
-	private int update_id;
+	private long update_id;
 	
 	private String first_name;
 	
 	private Date date_received;
 	
-	private String message;
+	private String text;
 	
-	protected Update(String input) throws JSONFormatException {		
+	protected Update(String input) throws JSONFormatException {	
 		
-		this.checkOk(input);
+		parser = new JSONParser();
+		try {
+			 response = (JSONObject) parser.parse(input);
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		
+		ok = (Boolean) response.get("ok");
 		if(!ok) {
 			return;
 		}
 		
-		this.checkUpdated(input);
+		updated = (((JSONArray) response.get("result")).size() == 0 ? false : true);
 		if(!updated) {
 			return;
 		}
 		
-		this.getUpdateId(input);
-		this.getName(input);
-		this.getDateReceived(input);
-		this.getMessage(input);
-	}
-
-	private void checkOk(String input) throws JSONFormatException {
-		int idxOk = input.indexOf("ok") + 4;
-		if(idxOk == -1) {
-			throw new JSONFormatException();
-		}
-		StringBuilder okBldr = new StringBuilder();
-		while(input.charAt(idxOk) != ',') {
-			okBldr.append(input.charAt(idxOk));
-			idxOk++;
-		}
-		String strOk = okBldr.toString();
-		if(strOk.compareTo("true") == 0) {
-			ok = true;
-		}
-		else {
-			ok = false;
-		}
-	}
-	
-	private void checkUpdated(String input) throws JSONFormatException {
-		int idxResult = input.indexOf("result") + 9;
-		if(idxResult == -1) {
-			throw new JSONFormatException();
-		}
-		if(input.charAt(idxResult) == ']') {
-			updated = false;
-		}
-		else {
-			updated = true;
-		}
-	}
-	
-	private void getUpdateId(String input) throws JSONFormatException {
-		int idxUpdateId = input.indexOf("update_id") + 11;
-		if(idxUpdateId == -1) {
-			throw new JSONFormatException();
-		}
-		StringBuilder updateIdBldr = new StringBuilder();
-		while(input.charAt(idxUpdateId) != ',') {
-			updateIdBldr.append(input.charAt(idxUpdateId));
-			idxUpdateId++;
-		}
-		update_id = Integer.parseInt(updateIdBldr.toString());
-	}
-	
-	private void getName(String input) throws JSONFormatException {
-		int idxName = input.indexOf("first_name") + 13;
-		if(idxName == -1) {
-			throw new JSONFormatException();
-		}
-		StringBuilder nameBldr = new StringBuilder();
-		while(input.charAt(idxName) != '"') {
-			nameBldr.append(input.charAt(idxName));
-			idxName++;
-		}
-		first_name = nameBldr.toString();
-	}
-	
-	private void getDateReceived(String input) throws JSONFormatException {
-		int idxDate = input.indexOf("\"date\"") + 7;
-		if(idxDate == -1) {
-			throw new JSONFormatException();
-		}
-		StringBuilder dateBldr = new StringBuilder();
-		while(input.charAt(idxDate) != ',') {
-			dateBldr.append(input.charAt(idxDate));
-			idxDate++;
-		}
-		date_received = Date.from(Instant.ofEpochSecond(Integer.valueOf(dateBldr.toString())));
-	}
-	
-	private void getMessage(String input) throws JSONFormatException {
-		int idxMsg = input.indexOf("\"text\"") + 8;
-		if(idxMsg == -1) {
-			throw new JSONFormatException();
-		}
-		StringBuilder msgBldr = new StringBuilder();
-		while(!(input.charAt(idxMsg) == '"' && input.charAt(idxMsg - 1) != '\\')) {
-			msgBldr.append(input.charAt(idxMsg));
-			idxMsg++;
-		}
-		message = unescapeJava(msgBldr.toString());
+		message = (JSONObject) ((JSONObject) ((JSONArray) response.get("result")).get(0)).get("message");
+		
+		update_id = (long) ((JSONObject) ((JSONArray) response.get("result")).get(0)).get("update_id");
+		first_name = (String) ((JSONObject) message.get("from")).get("first_name");
+		date_received = Date.from(Instant.ofEpochSecond((long) message.get("date")));
+		text = unescapeJava((String) message.get("text"));
 	}
 	
 	public boolean updated() {
@@ -139,7 +72,7 @@ public class Update {
 		return ok;
 	}
 	
-	public int getUpdateId() {
+	public long getUpdateId() {
 		return update_id;
 	}
 	
@@ -151,8 +84,8 @@ public class Update {
 		return date_received;
 	}
 	
-	public String getMessage() {
-		return message;
+	public String getText() {
+		return text;
 	}
 
 }

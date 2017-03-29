@@ -35,7 +35,7 @@ public enum UpdateManager {
 	
 	String charset = java.nio.charset.StandardCharsets.UTF_8.name();
 	
-	int offset = 0;
+	long offset = 0;
 	
 	int limit = 1;
 	
@@ -74,7 +74,7 @@ public enum UpdateManager {
 		try {
 			query = String.format("%s=%s&%s=%s&%s=%s&%s=%s",
 						URLEncoder.encode("offset", charset),
-						URLEncoder.encode(Integer.toString(offset), charset),
+						URLEncoder.encode(Long.toString(offset), charset),
 						URLEncoder.encode("limit", charset),
 						URLEncoder.encode(Integer.toString(limit), charset),
 						URLEncoder.encode("timeout", charset),
