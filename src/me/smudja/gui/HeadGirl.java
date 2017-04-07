@@ -1,19 +1,29 @@
 package me.smudja.gui;
 
-import java.text.DateFormat;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.FlowPane;
 import javafx.stage.Stage;
-import me.smudja.updater.Update;
-import me.smudja.updater.UpdateManager;
 
 public class HeadGirl extends Application {
 	
 	public final static String VERSION = "1.0a";
+	
+	public final static int MAX_UPDATES = 9;
+
+	public final static int TIMEOUT = 1;
+	
+	public final static int MESSAGE_LIFE = 30000;
+	
+	public final static int UPDATE_FREQUENCY = 10000;
+	
+	private Updater updater;
 
 	public static void main(String[] args) {
 		launch(args);
@@ -21,7 +31,7 @@ public class HeadGirl extends Application {
 
 	@Override
 	public void init() {
-		
+		updater = new Updater();
 	}
 	
 	@Override
@@ -34,22 +44,7 @@ public class HeadGirl extends Application {
 		
 		primaryStage.setScene(new Scene(rootNode, 1200, 600));		
 		
-		String text;
-		StringBuilder textBuilder = new StringBuilder();
-		for(Update update : UpdateManager.INSTANCE.getUpdates()) {
-			textBuilder.append("Update ID: " + update.getUpdateId() + "\n");
-			textBuilder.append("[" + update.getFirstName() + "] " + update.getText() + "\n");
-			textBuilder.append("Received: " + DateFormat.getInstance().format(update.getDate()) + "\n");
-			textBuilder.append("\n");
-		}
-		if(textBuilder.length() == 0) {
-			text = "No Updates To Display...";
-		}
-		else {
-			text = textBuilder.toString();
-		}
-		
-		TextArea display = new TextArea(text);
+		TextArea display = new TextArea(updater.update());
 		display.setEditable(false);
 		display.setPrefSize(1200, 600);
 		// google "using css in javafx" to find out how to edit the text in an easy way!
@@ -57,5 +52,20 @@ public class HeadGirl extends Application {
 		rootNode.getChildren().add(display);
 		
 		primaryStage.show();
+		
+		Timer timer = new Timer();
+		timer.scheduleAtFixedRate(new TimerTask() {
+		        @Override
+		        public void run() {
+		            Platform.runLater(new Runnable() {
+
+						@Override
+						public void run() {
+							display.setText(updater.update());
+						}
+		            	
+		            });
+		        }
+		    }, 0, HeadGirl.UPDATE_FREQUENCY);
 	}
 }

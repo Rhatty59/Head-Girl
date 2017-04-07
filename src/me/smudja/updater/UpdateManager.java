@@ -15,6 +15,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import me.smudja.gui.HeadGirl;
+
 /**
  * @author smithl
  *
@@ -39,7 +41,7 @@ public enum UpdateManager {
 	
 	int limit = 1;
 	
-	int timeout = 1;
+	int timeout = HeadGirl.TIMEOUT;
 	
 	String[] allowed_updates = {"message"};
 
@@ -103,9 +105,6 @@ public enum UpdateManager {
 			return response;
 		} catch (IOException ioExc) {
 			ioExc.printStackTrace();
-			return null;
-		} catch (JSONFormatException jsonExc) {
-			jsonExc.printStackTrace();
 			return null;
 		}
 	}

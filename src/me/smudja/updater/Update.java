@@ -33,11 +33,13 @@ public class Update {
 	
 	private String first_name;
 	
-	private Date date_received;
+	private long raw_date;
+	
+	private Date time_received;
 	
 	private String text;
 	
-	protected Update(String input) throws JSONFormatException {	
+	protected Update(String input) {	
 		
 		parser = new JSONParser();
 		try {
@@ -60,7 +62,8 @@ public class Update {
 		
 		update_id = (long) ((JSONObject) ((JSONArray) response.get("result")).get(0)).get("update_id");
 		first_name = (String) ((JSONObject) message.get("from")).get("first_name");
-		date_received = Date.from(Instant.ofEpochSecond((long) message.get("date")));
+		raw_date = ((long) message.get("date")) * 1000;
+		time_received = Date.from(Instant.ofEpochMilli(raw_date));
 		text = unescapeJava((String) message.get("text"));
 	}
 	
@@ -80,8 +83,12 @@ public class Update {
 		return first_name;
 	}
 	
+	public long getRawDate() {
+		return raw_date;
+	}
+	
 	public Date getDate() {
-		return date_received;
+		return time_received;
 	}
 	
 	public String getText() {
