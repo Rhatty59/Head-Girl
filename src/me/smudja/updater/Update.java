@@ -8,10 +8,7 @@ import static org.apache.commons.lang3.StringEscapeUtils.unescapeJava;
 import java.time.Instant;
 import java.util.Date;
 
-import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 /**
  * @author smithl
@@ -19,17 +16,11 @@ import org.json.simple.parser.ParseException;
  */
 public class Update {
 	
-	private JSONParser parser;
-	
-	private JSONObject response;
-	
-	private JSONObject message;
-	
-	private boolean updated;
-	
-	private boolean ok;
+	private boolean valid;
 	
 	private long update_id;
+	
+	private long user_id;
 	
 	private String first_name;
 	
@@ -39,44 +30,34 @@ public class Update {
 	
 	private String text;
 	
-	protected Update(String input) {	
+	protected Update(JSONObject jsonUpdate) {
 		
-		parser = new JSONParser();
-		try {
-			 response = (JSONObject) parser.parse(input);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
-		
-		ok = (Boolean) response.get("ok");
-		if(!ok) {
-			return;
-		}
-		
-		updated = (((JSONArray) response.get("result")).size() == 0 ? false : true);
-		if(!updated) {
-			return;
-		}
-		
-		message = (JSONObject) ((JSONObject) ((JSONArray) response.get("result")).get(0)).get("message");
-		
-		update_id = (long) ((JSONObject) ((JSONArray) response.get("result")).get(0)).get("update_id");
-		first_name = (String) ((JSONObject) message.get("from")).get("first_name");
-		raw_date = ((long) message.get("date")) * 1000;
+		update_id = (long) jsonUpdate.get("update_id");
+		user_id = (long) ((JSONObject)((JSONObject)jsonUpdate.get("message")).get("from")).get("id");
+		first_name = (String) ((JSONObject)((JSONObject)jsonUpdate.get("message")).get("from")).get("first_name");
+		raw_date = ((long) ((JSONObject)jsonUpdate.get("message")).get("date")) * 1000;
 		time_received = Date.from(Instant.ofEpochMilli(raw_date));
-		text = unescapeJava((String) message.get("text"));
+		
+		if(!((JSONObject)jsonUpdate.get("message")).containsKey("text")) {
+			valid = false;
+			text = "";
+		}
+		else {
+			valid = true;
+			text = unescapeJava((String) ((JSONObject)jsonUpdate.get("message")).get("text"));
+		}	
 	}
 	
-	public boolean updated() {
-		return updated;
-	}
-	
-	public boolean ok() {
-		return ok;
+	public boolean valid() {
+		return valid;
 	}
 	
 	public long getUpdateId() {
 		return update_id;
+	}
+	
+	public long getUserId() {
+		return user_id;
 	}
 	
 	public String getFirstName() {

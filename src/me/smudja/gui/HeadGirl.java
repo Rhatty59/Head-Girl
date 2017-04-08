@@ -22,6 +22,8 @@ public class HeadGirl extends Application {
 	public final static int MESSAGE_LIFE = 30000;
 	
 	public final static int UPDATE_FREQUENCY = 10000;
+
+	public static final int REQUEST_LIMIT = 10;
 	
 	private Updater updater;
 

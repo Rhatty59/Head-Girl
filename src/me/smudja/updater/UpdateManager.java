@@ -14,6 +14,14 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.stream.LongStream;
+
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+import org.json.simple.parser.ParseException;
 
 import me.smudja.gui.HeadGirl;
 
@@ -30,6 +38,8 @@ public enum UpdateManager {
 	 */
 	private String token;
 	
+	private long[] authorised_users;
+	
 	/**
 	 * url - the base url for executing commands
 	 */
@@ -39,7 +49,7 @@ public enum UpdateManager {
 	
 	long offset = 0;
 	
-	int limit = 1;
+	int limit = HeadGirl.REQUEST_LIMIT;
 	
 	int timeout = HeadGirl.TIMEOUT;
 	
@@ -50,7 +60,15 @@ public enum UpdateManager {
 	 */
 	private UpdateManager() {
 		try {
+			if (!Files.exists(Paths.get("authorised_users"))) {
+			    Files.createFile(Paths.get("authorised_users"));
+			}
 			token = new String(Files.readAllBytes(Paths.get("token"))).trim();
+			List<String> authUsersStr = Files.readAllLines(Paths.get("authorised_users"));
+			authorised_users = new long[authUsersStr.size()];
+			for(String userStr : authUsersStr) {
+				authorised_users[authUsersStr.indexOf(userStr)] = Long.parseLong(userStr.trim());
+			}
 			url = "https://api.telegram.org/bot" + URLEncoder.encode(token, charset) + "/";
 		}
 		catch(IOException exc) {
@@ -60,18 +78,20 @@ public enum UpdateManager {
 	
 	public Update[] getUpdates() {
 		ArrayList<Update> updatesList = new ArrayList<Update>();
-		Update update;
+		Update[] updateArr;
 		do {
-			update = getUpdate();
-			if(update.updated()) {
-				updatesList.add(update);
+			updateArr = getUpdate();
+			if(!(updateArr == null)) {
+				for(Update update : updateArr) {
+					updatesList.add(update);
+				}
 			}
-		} while(update.updated());
+		} while(!(updateArr == null));
 		Update[] updates = new Update[]{};
 		return updatesList.toArray(updates);
 	}
 	
-	private Update getUpdate() {
+	private Update[] getUpdate() {
 		String query;
 		try {
 			query = String.format("%s=%s&%s=%s&%s=%s&%s=%s",
@@ -96,13 +116,56 @@ public enum UpdateManager {
 			StringBuilder responseStrBuilder = new StringBuilder();
 
 			String inputStr;
-			while ((inputStr = streamReader.readLine()) != null)
-			    responseStrBuilder.append(inputStr);
-			Update response = new Update(responseStrBuilder.toString());
-			if(response.ok() && response.updated()) {
-				offset = response.getUpdateId() + 1;
+			while ((inputStr = streamReader.readLine()) != null) {
+				 responseStrBuilder.append(inputStr);
 			}
-			return response;
+			
+			JSONParser parser = new JSONParser();
+			
+			JSONObject response;
+			try {
+				 response = (JSONObject) parser.parse(responseStrBuilder.toString());
+			} catch (ParseException e) {
+				e.printStackTrace();
+				return null;
+			}
+			
+			Boolean ok = (Boolean) response.get("ok");
+			if(!ok) {
+				return null;
+			}
+			
+			JSONArray result = (JSONArray) response.get("result");
+			
+			Boolean updated = (result.size() == 0 ? false : true);
+			if(!updated) {
+				return null;
+			}
+			
+			ArrayList<Update> updatesList = new ArrayList<Update>();
+			
+			@SuppressWarnings("unchecked")
+			Iterator<JSONObject> iterator = result.iterator();
+			
+			while(iterator.hasNext()) {
+				updatesList.add(new Update(iterator.next()));
+			}
+			
+			if(ok && updated) {
+				offset = updatesList.get(updatesList.size() - 1).getUpdateId() + 1;
+			}
+			
+			Iterator<Update> updateIterator = updatesList.iterator();
+			while(updateIterator.hasNext()) {
+				Update sel = updateIterator.next();
+				if(!(sel.valid()) || !(LongStream.of(authorised_users).anyMatch(x -> x == sel.getUserId()))) {
+					updateIterator.remove();
+				}
+			}
+			
+			Update[] updates = new Update[]{};
+			
+			return updatesList.toArray(updates);
 		} catch (IOException ioExc) {
 			ioExc.printStackTrace();
 			return null;
