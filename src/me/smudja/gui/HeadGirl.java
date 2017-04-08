@@ -1,5 +1,12 @@
 package me.smudja.gui;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -15,15 +22,15 @@ public class HeadGirl extends Application {
 	
 	public final static String VERSION = "1.0a";
 	
-	public final static int MAX_UPDATES = 9;
+	private static int MAX_UPDATES;
 
-	public final static int TIMEOUT = 1;
+	private static int TIMEOUT;
 	
-	public final static int MESSAGE_LIFE = 30000;
+	private static int MESSAGE_LIFE;
 	
-	public final static int UPDATE_FREQUENCY = 10000;
+	private static int UPDATE_FREQUENCY;
 
-	public static final int REQUEST_LIMIT = 10;
+	private static int REQUEST_LIMIT;
 	
 	private Updater updater;
 
@@ -34,6 +41,39 @@ public class HeadGirl extends Application {
 	@Override
 	public void init() {
 		updater = new Updater();
+		Properties prop = new Properties();
+		if(!Files.exists(Paths.get("config.properties"))) {
+			try {
+				Files.createFile(Paths.get("config.properties"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			try(FileOutputStream output = new FileOutputStream("config.properties")) {
+				prop.setProperty("max_updates", "9");
+				prop.setProperty("timeout", "1");
+				prop.setProperty("message_life", "30000");
+				prop.setProperty("update_frequency", "10000");
+				prop.setProperty("request_limit", "10");
+				prop.store(output, "Configuration file for Head Girl");
+			} catch (FileNotFoundException e) {
+				e.printStackTrace();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+
+		try(FileInputStream input = new FileInputStream("config.properties")) {
+			prop.load(input);
+			MAX_UPDATES = Integer.parseInt(prop.getProperty("max_updates"));
+			TIMEOUT = Integer.parseInt(prop.getProperty("timeout"));
+			MESSAGE_LIFE = Integer.parseInt(prop.getProperty("message_life"));
+			UPDATE_FREQUENCY = Integer.parseInt(prop.getProperty("update_frequency"));
+			REQUEST_LIMIT = Integer.parseInt(prop.getProperty("request_limit"));
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -69,5 +109,25 @@ public class HeadGirl extends Application {
 		            });
 		        }
 		    }, 0, HeadGirl.UPDATE_FREQUENCY);
+	}
+	
+	public static int getMaxUpdates() {
+		return MAX_UPDATES;
+	}
+
+	public static int getTimeout() {
+		return TIMEOUT;
+	}
+	
+	public static int getMessageLife() {
+		return MESSAGE_LIFE;
+	}
+	
+	public static int getUpdateFrequency() {
+		return UPDATE_FREQUENCY;
+	}
+
+	public static int getRequestLimit() {
+		return REQUEST_LIMIT;
 	}
 }

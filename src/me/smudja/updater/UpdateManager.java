@@ -49,9 +49,9 @@ public enum UpdateManager {
 	
 	long offset = 0;
 	
-	int limit = HeadGirl.REQUEST_LIMIT;
+	int limit = HeadGirl.getRequestLimit();
 	
-	int timeout = HeadGirl.TIMEOUT;
+	int timeout = HeadGirl.getTimeout();
 	
 	String[] allowed_updates = {"message"};
 

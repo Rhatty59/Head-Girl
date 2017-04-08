@@ -32,16 +32,16 @@ public class Updater {
 		Iterator<Update> iterator = updates.iterator();
 		while (iterator.hasNext()) {
 			Update item = iterator.next();
-			if((currentTime - item.getRawDate()) > HeadGirl.MESSAGE_LIFE) {
+			if((currentTime - item.getRawDate()) > HeadGirl.getMessageLife()) {
 				iterator.remove();
 			}
 		}
 		
-		if (updates.size() >= HeadGirl.MAX_UPDATES) {
+		if (updates.size() >= HeadGirl.getMaxUpdates()) {
 		    
 			ArrayList<Update> miniArray = new ArrayList<Update>();
 		    
-			for(int i = HeadGirl.MAX_UPDATES; i > 0; i--) {
+			for(int i = HeadGirl.getMaxUpdates(); i > 0; i--) {
 				miniArray.add(updates.get(updates.size()-i));
 			}
 
