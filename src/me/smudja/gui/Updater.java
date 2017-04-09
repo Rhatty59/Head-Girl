@@ -62,7 +62,7 @@ public class Updater {
 			textBuilder.append("\n");
 		}
 		if(textBuilder.length() == 0) {
-			text = "No Messages To Display...";
+			text = "No New Messages";
 		}
 		else {
 			text = textBuilder.toString().trim();
