@@ -3,7 +3,7 @@
  */
 package me.smudja.gui;
 
-import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -52,17 +52,20 @@ public class Updater {
 		
 		String text;
 		StringBuilder textBuilder = new StringBuilder();
+		SimpleDateFormat format = new SimpleDateFormat("dd MMM YYYY HH:mm");
 		for(Update update : updates) {
-			textBuilder.append("Update ID: " + update.getUpdateId() + "\n");
-			textBuilder.append("[" + update.getFirstName() + "] " + update.getText() + "\n");
-			textBuilder.append("Received: " + DateFormat.getDateTimeInstance().format(update.getDate()) + "\n");
+			textBuilder.append("[" + update.getFirstName().toUpperCase() + "] " + update.getText() + "\n");
+			if(HeadGirl.getMaxUpdates() == 1) {
+				textBuilder.append("\n");
+			}
+			textBuilder.append("SENT: " +format.format(update.getDate()).toUpperCase() + "\n");
 			textBuilder.append("\n");
 		}
 		if(textBuilder.length() == 0) {
-			text = "No Updates To Display...";
+			text = "No Messages To Display...";
 		}
 		else {
-			text = textBuilder.toString();
+			text = textBuilder.toString().trim();
 		}
 		
 		return text;
