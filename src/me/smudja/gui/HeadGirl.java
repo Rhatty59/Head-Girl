@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.DateFormat;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -23,24 +24,59 @@ import javafx.stage.Stage;
 
 public class HeadGirl extends Application {
 	
+	/**
+	 * version
+	 */
 	public final static String VERSION = "1.0a";
 	
+	/**
+	 * the maximum number of updates to be displayed at once
+	 */
 	private static int MAX_UPDATES;
-
+	
+	/**
+	 * the time to wait for a response from the API
+	 * (seconds)
+	 */
 	private static int TIMEOUT;
 	
+	/**
+	 * how long messages should persist before they expire
+	 * (milliseconds)
+	 */
 	private static int MESSAGE_LIFE;
 	
+	/**
+	 * how often to check for updates
+	 * (milliseconds)
+	 */
 	private static int UPDATE_FREQUENCY;
-
+	
+	/**
+	 * maximum number of updates to get at once
+	 */
 	private static int REQUEST_LIMIT;
 	
+	/**
+	 * width of window
+	 * (pixels)
+	 */
 	private static int WINDOW_WIDTH;
 	
+	/**
+	 * height of window
+	 * (pixels)
+	 */
 	private static int WINDOW_HEIGHT;
 	
+	/**
+	 * default font size for text display
+	 */
 	private static int FONT_SIZE;
 	
+	/**
+	 * updater instance
+	 */
 	private Updater updater;
 
 	public static void main(String[] args) {
@@ -51,11 +87,12 @@ public class HeadGirl extends Application {
 	public void init() {
 		updater = new Updater();
 		Properties prop = new Properties();
+		// if no properties file, create it
 		if(!Files.exists(Paths.get("config.properties"))) {
 			try {
 				Files.createFile(Paths.get("config.properties"));
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to create properties file. Will try again on next init");
 			}
 			try(FileOutputStream output = new FileOutputStream("config.properties")) {
 				prop.setProperty("max_updates", "9");
@@ -68,26 +105,42 @@ public class HeadGirl extends Application {
 				prop.setProperty("font_size", "60");
 				prop.store(output, "Configuration file for Head Girl");
 			} catch (FileNotFoundException e) {
-				e.printStackTrace();
+				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to store default properties as file does not exist.");
 			} catch (IOException e) {
-				e.printStackTrace();
+				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to store default properties (IOException)");
 			}
 		}
 
 		try(FileInputStream input = new FileInputStream("config.properties")) {
 			prop.load(input);
-			MAX_UPDATES = Integer.parseInt(prop.getProperty("max_updates"));
-			TIMEOUT = Integer.parseInt(prop.getProperty("timeout"));
-			MESSAGE_LIFE = Integer.parseInt(prop.getProperty("message_life"));
-			UPDATE_FREQUENCY = Integer.parseInt(prop.getProperty("update_frequency"));
-			REQUEST_LIMIT = Integer.parseInt(prop.getProperty("request_limit"));
-			WINDOW_WIDTH = Integer.parseInt(prop.getProperty("window_width"));
-			WINDOW_HEIGHT = Integer.parseInt(prop.getProperty("window_height"));
-			FONT_SIZE = Integer.parseInt(prop.getProperty("font_size"));
+			MAX_UPDATES = Integer.parseInt(prop.getProperty("max_updates", "9"));
+			TIMEOUT = Integer.parseInt(prop.getProperty("timeout", "1"));
+			MESSAGE_LIFE = Integer.parseInt(prop.getProperty("message_life", "30000"));
+			UPDATE_FREQUENCY = Integer.parseInt(prop.getProperty("update_frequency", "10000"));
+			REQUEST_LIMIT = Integer.parseInt(prop.getProperty("request_limit", "10"));
+			WINDOW_WIDTH = Integer.parseInt(prop.getProperty("window_width", "1200"));
+			WINDOW_HEIGHT = Integer.parseInt(prop.getProperty("window_height", "600"));
+			FONT_SIZE = Integer.parseInt(prop.getProperty("font_size", "60"));
 		} catch (FileNotFoundException e) {
-			e.printStackTrace();
+			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to load properties as file doesn't exist, using defaults");
+			MAX_UPDATES = 9;
+			TIMEOUT = 1;
+			MESSAGE_LIFE = 30000;
+			UPDATE_FREQUENCY = 10000;
+			REQUEST_LIMIT = 10;
+			WINDOW_WIDTH = 1200;
+			WINDOW_HEIGHT = 600;
+			FONT_SIZE = 60;
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to load properties (IO Exception), using defaults");
+			MAX_UPDATES = 9;
+			TIMEOUT = 1;
+			MESSAGE_LIFE = 30000;
+			UPDATE_FREQUENCY = 10000;
+			REQUEST_LIMIT = 10;
+			WINDOW_WIDTH = 1200;
+			WINDOW_HEIGHT = 600;
+			FONT_SIZE = 60;
 		}
 	}
 	
@@ -108,9 +161,7 @@ public class HeadGirl extends Application {
 		
 		text.setWrappingWidth(WINDOW_WIDTH);
 		text.setTextAlignment(TextAlignment.CENTER);
-		text.setFont(Font.font(FONT_SIZE));
-//		// google "using css in javafx" to find out how to edit the text in an easy way!
-//		
+		text.setFont(Font.font(FONT_SIZE));		
         
 		rootNode.getChildren().add(text);
         
@@ -118,6 +169,7 @@ public class HeadGirl extends Application {
         
         double font_size = text.getFont().getSize();
         
+        // rescale text size so that it fits on screen
         while(textBounds.getHeight() > WINDOW_HEIGHT) {
         	font_size--;
         	text.setFont(Font.font(font_size));
@@ -152,22 +204,42 @@ public class HeadGirl extends Application {
 		    }, 0, HeadGirl.UPDATE_FREQUENCY);
 	}
 
+	/**
+	 * 
+	 * @return max_updates
+	 */
 	public static int getMaxUpdates() {
 		return MAX_UPDATES;
 	}
 
+	/**
+	 * 
+	 * @return timeout
+	 */
 	public static int getTimeout() {
 		return TIMEOUT;
 	}
 	
+	/**
+	 * 
+	 * @return message_life
+	 */
 	public static int getMessageLife() {
 		return MESSAGE_LIFE;
 	}
 	
+	/**
+	 * 
+	 * @return update_frequency
+	 */
 	public static int getUpdateFrequency() {
 		return UPDATE_FREQUENCY;
 	}
 
+	/**
+	 * 
+	 * @return request_limit
+	 */
 	public static int getRequestLimit() {
 		return REQUEST_LIMIT;
 	}

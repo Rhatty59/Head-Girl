@@ -12,11 +12,16 @@ import me.smudja.updater.Update;
 import me.smudja.updater.UpdateManager;
 
 /**
+ * Deals with removing expired updates and adding new updates.
+ * Also, styles text.
  * @author smithl
  *
  */
 public class Updater {
 	
+	/**
+	 * updates - stores all current updates
+	 */
 	private ArrayList<Update> updates;
 	
 	public Updater() {
@@ -25,10 +30,9 @@ public class Updater {
 
 	public synchronized String update() {
 		
-		updates.addAll(Arrays.asList(UpdateManager.INSTANCE.getUpdates()));
-			
 		long currentTime = System.currentTimeMillis();
 		
+		// remove expired updates
 		Iterator<Update> iterator = updates.iterator();
 		while (iterator.hasNext()) {
 			Update item = iterator.next();
@@ -37,6 +41,11 @@ public class Updater {
 			}
 		}
 		
+		// add any new updates
+		updates.addAll(Arrays.asList(UpdateManager.INSTANCE.getUpdates()));
+			
+		
+		// if we have too many to display just take the most recent ones
 		if (updates.size() >= HeadGirl.getMaxUpdates()) {
 		    
 			ArrayList<Update> miniArray = new ArrayList<Update>();
@@ -49,7 +58,7 @@ public class Updater {
 		}
 
 
-		
+		// build text to be displayed
 		String text;
 		StringBuilder textBuilder = new StringBuilder();
 		SimpleDateFormat format = new SimpleDateFormat("dd MMM YYYY HH:mm");
