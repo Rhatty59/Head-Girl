@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -82,11 +83,12 @@ public enum UpdateManager {
 	 */
 	private UpdateManager() {
 		try {
-			if (!Files.exists(Paths.get("authorised_users"))) {
-			    Files.createFile(Paths.get("authorised_users"));
+			Path dir = Paths.get("").toAbsolutePath();
+			if (!Files.exists(dir.resolve("config/authorised_users"))) {
+			    Files.createFile(dir.resolve("config/authorised_users"));
 			}
-			token = new String(Files.readAllBytes(Paths.get("token"))).trim();
-			List<String> authUsersStr = Files.readAllLines(Paths.get("authorised_users"));
+			token = new String(Files.readAllBytes(dir.resolve("config/token"))).trim();
+			List<String> authUsersStr = Files.readAllLines(dir.resolve("config/authorised_users"));
 			authorised_users = new long[authUsersStr.size()];
 			for(String userStr : authUsersStr) {
 				authorised_users[authUsersStr.indexOf(userStr)] = Long.parseLong(userStr.trim());
@@ -215,7 +217,7 @@ public enum UpdateManager {
 			while(updateIterator.hasNext()) {
 				Update sel = updateIterator.next();
 				if(!(sel.valid()) || !(LongStream.of(authorised_users).anyMatch(x -> x == sel.getUserId()))) {
-					System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [INFO] " + "Unauthorised user sent message to bot! User ID: " + sel.getUpdateId());
+					System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [INFO] " + "Unauthorised user sent message to bot! User ID: " + sel.getUserId());
 					updateIterator.remove();
 				}
 			}

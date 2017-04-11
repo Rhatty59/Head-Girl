@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.util.Properties;
@@ -87,14 +88,16 @@ public class HeadGirl extends Application {
 	public void init() {
 		updater = new Updater();
 		Properties prop = new Properties();
+		Path dir = Paths.get("").toAbsolutePath();
 		// if no properties file, create it
-		if(!Files.exists(Paths.get("config.properties"))) {
+		if(!Files.exists(dir.resolve("config/config.properties").toAbsolutePath())) {
 			try {
-				Files.createFile(Paths.get("config.properties"));
+				Files.createDirectory(dir.resolve("config").toAbsolutePath());
+				Files.createFile(dir.resolve("config/config.properties").toAbsolutePath());
 			} catch (IOException e) {
 				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to create properties file. Will try again on next init");
 			}
-			try(FileOutputStream output = new FileOutputStream("config.properties")) {
+			try(FileOutputStream output = new FileOutputStream("config/config.properties")) {
 				prop.setProperty("max_updates", "9");
 				prop.setProperty("timeout", "1");
 				prop.setProperty("message_life", "30000");
@@ -111,7 +114,7 @@ public class HeadGirl extends Application {
 			}
 		}
 
-		try(FileInputStream input = new FileInputStream("config.properties")) {
+		try(FileInputStream input = new FileInputStream("config/config.properties")) {
 			prop.load(input);
 			MAX_UPDATES = Integer.parseInt(prop.getProperty("max_updates", "9"));
 			TIMEOUT = Integer.parseInt(prop.getProperty("timeout", "1"));
@@ -149,12 +152,12 @@ public class HeadGirl extends Application {
 		
 		primaryStage.setTitle("Head Girl v" + VERSION);
 		
-		FlowPane rootNode = new FlowPane(20, 20);
+		FlowPane rootNode = new FlowPane();
 		rootNode.setAlignment(Pos.CENTER);
 		rootNode.setMaxSize(WINDOW_WIDTH, WINDOW_HEIGHT);
 		
 		primaryStage.setScene(new Scene(rootNode, WINDOW_WIDTH, WINDOW_HEIGHT));
-		primaryStage.setResizable(false);
+		primaryStage.setResizable(true);
 		primaryStage.setFullScreen(true);
 		
 		Text text = new Text(updater.update());
