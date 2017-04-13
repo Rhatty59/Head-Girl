@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -17,7 +18,10 @@ import javafx.application.Platform;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
@@ -61,12 +65,14 @@ public class HeadGirl extends Application {
 	/**
 	 * width of window
 	 * (pixels)
+	 * needs to be set to screen resolution to ensure text fits correctly
 	 */
 	private static int WINDOW_WIDTH;
 	
 	/**
 	 * height of window
 	 * (pixels)
+	 * needs to be set to screen resolution to ensure text fits correctly
 	 */
 	private static int WINDOW_HEIGHT;
 	
@@ -74,6 +80,16 @@ public class HeadGirl extends Application {
 	 * default font size for text display
 	 */
 	private static int FONT_SIZE;
+	
+	/**
+	 * font color (HTML format)
+	 */
+	private static Paint FONT_COLOR;
+	
+	/**
+	 * background color (HTML format)
+	 */
+	private static Paint BACKGROUND_COLOR;
 	
 	/**
 	 * updater instance
@@ -90,11 +106,13 @@ public class HeadGirl extends Application {
 		Properties prop = new Properties();
 		Path dir = Paths.get("").toAbsolutePath();
 		// if no properties file, create it
-		if(!Files.exists(dir.resolve("config/config.properties").toAbsolutePath())) {
+		if(!Files.exists(dir.resolve("config/config.properties"))) {
 			try {
-				Files.createDirectory(dir.resolve("config").toAbsolutePath());
-				Files.createFile(dir.resolve("config/config.properties").toAbsolutePath());
-			} catch (IOException e) {
+				Files.createDirectory(dir.resolve("config"));
+				Files.createFile(dir.resolve("config/config.properties"));
+			} 
+			catch (FileAlreadyExistsException faeExc) {}
+			catch (IOException e) {
 				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to create properties file. Will try again on next init");
 			}
 			try(FileOutputStream output = new FileOutputStream("config/config.properties")) {
@@ -106,6 +124,8 @@ public class HeadGirl extends Application {
 				prop.setProperty("window_width", "1200");
 				prop.setProperty("window_height", "600");
 				prop.setProperty("font_size", "60");
+				prop.setProperty("font_color", "000000");
+				prop.setProperty("background_color", "FFFFFF");
 				prop.store(output, "Configuration file for Head Girl");
 			} catch (FileNotFoundException e) {
 				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to store default properties as file does not exist.");
@@ -124,6 +144,8 @@ public class HeadGirl extends Application {
 			WINDOW_WIDTH = Integer.parseInt(prop.getProperty("window_width", "1200"));
 			WINDOW_HEIGHT = Integer.parseInt(prop.getProperty("window_height", "600"));
 			FONT_SIZE = Integer.parseInt(prop.getProperty("font_size", "60"));
+			FONT_COLOR = Paint.valueOf(prop.getProperty("font_color", "000000"));
+			BACKGROUND_COLOR = Paint.valueOf(prop.getProperty("background_color", "FFFFFF"));
 		} catch (FileNotFoundException e) {
 			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to load properties as file doesn't exist, using defaults");
 			MAX_UPDATES = 9;
@@ -134,6 +156,8 @@ public class HeadGirl extends Application {
 			WINDOW_WIDTH = 1200;
 			WINDOW_HEIGHT = 600;
 			FONT_SIZE = 60;
+			FONT_COLOR = Paint.valueOf("000000");
+			BACKGROUND_COLOR = Paint.valueOf("FFFFFF");
 		} catch (IOException e) {
 			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to load properties (IO Exception), using defaults");
 			MAX_UPDATES = 9;
@@ -144,6 +168,8 @@ public class HeadGirl extends Application {
 			WINDOW_WIDTH = 1200;
 			WINDOW_HEIGHT = 600;
 			FONT_SIZE = 60;
+			FONT_COLOR = Paint.valueOf("000000");
+			BACKGROUND_COLOR = Paint.valueOf("FFFFFF");
 		}
 	}
 	
@@ -155,6 +181,7 @@ public class HeadGirl extends Application {
 		FlowPane rootNode = new FlowPane();
 		rootNode.setAlignment(Pos.CENTER);
 		rootNode.setMaxSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+		rootNode.setBackground(new Background(new BackgroundFill(BACKGROUND_COLOR, null, null)));
 		
 		primaryStage.setScene(new Scene(rootNode, WINDOW_WIDTH, WINDOW_HEIGHT));
 		primaryStage.setResizable(true);
@@ -165,7 +192,8 @@ public class HeadGirl extends Application {
 		text.setWrappingWidth(WINDOW_WIDTH);
 		text.setTextAlignment(TextAlignment.CENTER);
 		text.setFont(Font.font(FONT_SIZE));		
-        
+        text.setFill(FONT_COLOR);
+		
 		rootNode.getChildren().add(text);
         
         Bounds textBounds = text.getBoundsInLocal();
