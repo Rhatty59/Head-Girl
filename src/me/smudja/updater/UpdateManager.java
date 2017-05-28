@@ -87,6 +87,11 @@ public enum UpdateManager {
 			if (!Files.exists(dir.resolve("config/authorised_users"))) {
 			    Files.createFile(dir.resolve("config/authorised_users"));
 			}
+			if (!Files.exists(dir.resolve("config/token"))) {
+				Files.createFile(dir.resolve("config/token"));
+				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [INFO] " + "No token file found. Please fill in token. Exiting...");
+				System.exit(1);
+			}
 			token = new String(Files.readAllBytes(dir.resolve("config/token"))).trim();
 			List<String> authUsersStr = Files.readAllLines(dir.resolve("config/authorised_users"));
 			authorised_users = new long[authUsersStr.size()];

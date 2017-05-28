@@ -118,7 +118,7 @@ public class HeadGirl extends Application {
 			try(FileOutputStream output = new FileOutputStream("config/config.properties")) {
 				prop.setProperty("max_updates", "9");
 				prop.setProperty("timeout", "1");
-				prop.setProperty("message_life", "30000");
+				prop.setProperty("message_life", "300000");
 				prop.setProperty("update_frequency", "10000");
 				prop.setProperty("request_limit", "10");
 				prop.setProperty("window_width", "1200");
@@ -138,7 +138,7 @@ public class HeadGirl extends Application {
 			prop.load(input);
 			MAX_UPDATES = Integer.parseInt(prop.getProperty("max_updates", "9"));
 			TIMEOUT = Integer.parseInt(prop.getProperty("timeout", "1"));
-			MESSAGE_LIFE = Integer.parseInt(prop.getProperty("message_life", "30000"));
+			MESSAGE_LIFE = Integer.parseInt(prop.getProperty("message_life", "300000"));
 			UPDATE_FREQUENCY = Integer.parseInt(prop.getProperty("update_frequency", "10000"));
 			REQUEST_LIMIT = Integer.parseInt(prop.getProperty("request_limit", "10"));
 			WINDOW_WIDTH = Integer.parseInt(prop.getProperty("window_width", "1200"));
@@ -150,7 +150,7 @@ public class HeadGirl extends Application {
 			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to load properties as file doesn't exist, using defaults");
 			MAX_UPDATES = 9;
 			TIMEOUT = 1;
-			MESSAGE_LIFE = 30000;
+			MESSAGE_LIFE = 300000;
 			UPDATE_FREQUENCY = 10000;
 			REQUEST_LIMIT = 10;
 			WINDOW_WIDTH = 1200;
@@ -162,7 +162,7 @@ public class HeadGirl extends Application {
 			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to load properties (IO Exception), using defaults");
 			MAX_UPDATES = 9;
 			TIMEOUT = 1;
-			MESSAGE_LIFE = 30000;
+			MESSAGE_LIFE = 300000;
 			UPDATE_FREQUENCY = 10000;
 			REQUEST_LIMIT = 10;
 			WINDOW_WIDTH = 1200;
