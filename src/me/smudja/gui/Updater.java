@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import me.smudja.updater.Update;
+import me.smudja.updater.TextUpdate;
 import me.smudja.updater.UpdateManager;
 
 /**
@@ -22,13 +22,13 @@ public class Updater {
 	/**
 	 * updates - stores all current updates
 	 */
-	private ArrayList<Update> updates;
+	private ArrayList<TextUpdate> updates;
 	
 	private int numberMessages = 0;
 	public int messageToDisplay = -1;
 	
 	public Updater() {
-		updates = new ArrayList<Update>();
+		updates = new ArrayList<TextUpdate>();
 	}
 
 	public synchronized String update() {
@@ -36,9 +36,9 @@ public class Updater {
 		long currentTime = System.currentTimeMillis();
 		
 		// remove expired updates
-		Iterator<Update> iterator = updates.iterator();
+		Iterator<TextUpdate> iterator = updates.iterator();
 		while (iterator.hasNext()) {
-			Update item = iterator.next();
+			TextUpdate item = iterator.next();
 			if((currentTime - item.getRawDate()) > HeadGirl.getMessageLife()) {
 				iterator.remove();
 			}
@@ -51,7 +51,7 @@ public class Updater {
 		// if we have too many to display just take the most recent ones
 		if (updates.size() >= HeadGirl.getMaxUpdates()) {
 		    
-			ArrayList<Update> miniArray = new ArrayList<Update>();
+			ArrayList<TextUpdate> miniArray = new ArrayList<TextUpdate>();
 		    
 			for(int i = HeadGirl.getMaxUpdates(); i > 0; i--) {
 				miniArray.add(updates.get(updates.size()-i));

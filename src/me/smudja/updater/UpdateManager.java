@@ -111,15 +111,15 @@ public enum UpdateManager {
 	 * 
 	 * @return an array containing all valid and non-expired updates
 	 */
-	public Update[] getUpdates() {
-		ArrayList<Update> updatesList = new ArrayList<Update>();
-		Update[] updateArr;
+	public TextUpdate[] getUpdates() {
+		ArrayList<TextUpdate> updatesList = new ArrayList<TextUpdate>();
+		TextUpdate[] updateArr;
 		
 		// keep requesting updates from API until there are no more. High limit value will reduce the number of loops here (min 2 loops)
 		do {
 			updateArr = getUpdate();
 			if(!(updateArr == null)) {
-				for(Update update : updateArr) {
+				for(TextUpdate update : updateArr) {
 					updatesList.add(update);
 				}
 			}
@@ -128,9 +128,9 @@ public enum UpdateManager {
 		long currentTime = System.currentTimeMillis();
 		
 		// Remove expired updates
-		Iterator<Update> iterator = updatesList.iterator();
+		Iterator<TextUpdate> iterator = updatesList.iterator();
 		while (iterator.hasNext()) {
-			Update item = iterator.next();
+			TextUpdate item = iterator.next();
 			if((currentTime - item.getRawDate()) > HeadGirl.getMessageLife()) {
 				iterator.remove();
 			}
@@ -140,7 +140,7 @@ public enum UpdateManager {
 		if(!updatesList.isEmpty()) {
 			ring();
 		}
-		Update[] updates = new Update[]{};
+		TextUpdate[] updates = new TextUpdate[]{};
 		return updatesList.toArray(updates);
 	}
 	
@@ -148,7 +148,7 @@ public enum UpdateManager {
 	 * 
 	 * @return an array containing all updates from a single request to the API
 	 */
-	private Update[] getUpdate() {
+	private TextUpdate[] getUpdate() {
 		String query;
 		try {
 			query = String.format("%s=%s&%s=%s&%s=%s&%s=%s",
@@ -203,32 +203,45 @@ public enum UpdateManager {
 				return null;
 			}
 			
-			ArrayList<Update> updatesList = new ArrayList<Update>();
+			// if we have updates set the offset such that these updates are confirmed so won't appear again
+			if(ok && updated) {
+				offset = ((long)((JSONObject)result.get(result.size() - 1)).get("update_id")) + 1;
+			}
+			
+			ArrayList<TextUpdate> updatesList = new ArrayList<TextUpdate>();
 			
 			@SuppressWarnings("unchecked")
 			Iterator<JSONObject> iterator = result.iterator();
 			
 			// for each update, convert it into an Update instance and add to arraylist
-			while(iterator.hasNext()) {
-				updatesList.add(new Update(iterator.next()));
-			}
 			
-			// if we have updates set the offset such that these updates are confirmed so won't appear again
-			if(ok && updated) {
-				offset = updatesList.get(updatesList.size() - 1).getUpdateId() + 1;
+			JSONObject update;
+			JSONObject message;
+			
+			while(iterator.hasNext()) {
+				update = iterator.next();
+				message = (JSONObject) update.get("message");
+				if (message.containsKey("text")) {
+					updatesList.add(new TextUpdate(update));
+				}
+				else if (message.containsKey("photo")) {
+				}
+				else {
+					Reporter.report("User sent invalid message (no text or photo field)", LogLevel.INFO);
+				}
 			}
 			
 			// remove messages from unauthorised users
-			Iterator<Update> updateIterator = updatesList.iterator();
+			Iterator<TextUpdate> updateIterator = updatesList.iterator();
 			while(updateIterator.hasNext()) {
-				Update sel = updateIterator.next();
+				TextUpdate sel = updateIterator.next();
 				if(!(sel.valid()) || !(LongStream.of(authorised_users).anyMatch(x -> x == sel.getUserId()))) {
 					Reporter.report("Unauthorised user sent message to bot! User ID: " + sel.getUserId(), LogLevel.INFO);
 					updateIterator.remove();
 				}
 			}
 			
-			Update[] updates = new Update[]{};
+			TextUpdate[] updates = new TextUpdate[]{};
 			
 			return updatesList.toArray(updates);
 		} catch (IOException ioExc) {

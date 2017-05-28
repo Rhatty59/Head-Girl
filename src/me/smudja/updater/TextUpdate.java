@@ -16,7 +16,7 @@ import org.json.simple.JSONObject;
  * Represents an singular message 'update' from the bot API
  *
  */
-public class Update {
+public class TextUpdate {
 	
 	/**
 	 * Stores whether or not the update is valid.
@@ -60,7 +60,7 @@ public class Update {
 	 * 
 	 * @param jsonUpdate - a JSONObject storing the update.
 	 */
-	protected Update(JSONObject jsonUpdate) {
+	protected TextUpdate(JSONObject jsonUpdate) {
 		
 		update_id = (long) jsonUpdate.get("update_id");
 		user_id = (long) ((JSONObject)((JSONObject)jsonUpdate.get("message")).get("from")).get("id");
