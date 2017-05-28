@@ -11,10 +11,9 @@ import java.util.Date;
 import org.json.simple.JSONObject;
 
 /**
+ *  Represents an singular message 'update' from the bot API
+ *  
  * @author smithl
- * 
- * Represents an singular message 'update' from the bot API
- *
  */
 public class TextUpdate {
 	
