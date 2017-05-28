@@ -14,7 +14,6 @@ import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -29,6 +28,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import me.smudja.gui.HeadGirl;
+import utility.LogLevel;
+import utility.Reporter;
 
 /**
  * @author smithl
@@ -89,7 +90,7 @@ public enum UpdateManager {
 			}
 			if (!Files.exists(dir.resolve("config/token"))) {
 				Files.createFile(dir.resolve("config/token"));
-				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [INFO] " + "No token file found. Please fill in token. Exiting...");
+				Reporter.report("No token file found. Please fill in token. Exiting...", LogLevel.INFO);
 				System.exit(1);
 			}
 			token = new String(Files.readAllBytes(dir.resolve("config/token"))).trim();
@@ -101,7 +102,7 @@ public enum UpdateManager {
 			url = "https://api.telegram.org/bot" + URLEncoder.encode(token, charset) + "/";
 		}
 		catch(IOException exc) {
-			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [FATAL] " + "Error instantiating UpdateManager. Shutting down...");
+			Reporter.report("Error instantiating UpdateManager. Shutting down...", LogLevel.FATAL);
 			System.exit(1);
 		}
 	}
@@ -161,7 +162,7 @@ public enum UpdateManager {
 						URLEncoder.encode("[\"" + String.join("\", \"", allowed_updates) + "\"]", charset)
 					);
 		} catch (UnsupportedEncodingException exc) {
-			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MAJOR] " + "Unable to encode query. Can't check for updates this run...");
+			Reporter.report("Unable to encode query. Can't check for updates this run...", LogLevel.MAJOR);
 			return null;
 		}
 		
@@ -184,13 +185,13 @@ public enum UpdateManager {
 			try {
 				 response = (JSONObject) parser.parse(responseStrBuilder.toString());
 			} catch (ParseException e) {
-				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MAJOR] " + "Unable to parse reponse from API. Can't check for updates this run...");
+				Reporter.report("Unable to parse reponse from API. Can't check for updates this run...", LogLevel.MINOR);
 				return null;
 			}
 			
 			Boolean ok = (Boolean) response.get("ok");
 			if(!ok) {
-				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Response from API not 'ok'. Can't check for updates this run...");
+				Reporter.report("Response from API not 'ok'. Can't check for updates this run...", LogLevel.MINOR);
 				return null;
 			}
 			
@@ -222,7 +223,7 @@ public enum UpdateManager {
 			while(updateIterator.hasNext()) {
 				Update sel = updateIterator.next();
 				if(!(sel.valid()) || !(LongStream.of(authorised_users).anyMatch(x -> x == sel.getUserId()))) {
-					System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [INFO] " + "Unauthorised user sent message to bot! User ID: " + sel.getUserId());
+					Reporter.report("Unauthorised user sent message to bot! User ID: " + sel.getUserId(), LogLevel.INFO);
 					updateIterator.remove();
 				}
 			}
@@ -231,7 +232,7 @@ public enum UpdateManager {
 			
 			return updatesList.toArray(updates);
 		} catch (IOException ioExc) {
-			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MAJOR] " + "Unable to request update from API (IO Exception). Can't check for updates this run...");
+			Reporter.report("Unable to request update from API (IO Exception). Can't check for updates this run...", LogLevel.MINOR);
 			return null;
 		}
 	}
@@ -251,7 +252,7 @@ public enum UpdateManager {
 	         // plays 3 times (1 + 2 loops)
 	         clip.loop(2);
 	      } catch (Exception e) {
-	    	  System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to play ringtone");
+	    	  Reporter.report("Unable to play ringtone", LogLevel.MINOR);
 	      }
 	}
 }

@@ -8,7 +8,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,6 +25,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import utility.LogLevel;
+import utility.Reporter;
 
 public class HeadGirl extends Application {
 	
@@ -113,7 +114,7 @@ public class HeadGirl extends Application {
 			} 
 			catch (FileAlreadyExistsException faeExc) {}
 			catch (IOException e) {
-				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to create properties file. Will try again on next init");
+				Reporter.report("Unable to create properties file. Will try again on next init", LogLevel.MINOR);
 			}
 			try(FileOutputStream output = new FileOutputStream("config/config.properties")) {
 				prop.setProperty("max_updates", "9");
@@ -128,9 +129,9 @@ public class HeadGirl extends Application {
 				prop.setProperty("background_color", "FFFFFF");
 				prop.store(output, "Configuration file for Head Girl");
 			} catch (FileNotFoundException e) {
-				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to store default properties as file does not exist.");
+				Reporter.report("Unable to store default properties as file does not exist.", LogLevel.MINOR);
 			} catch (IOException e) {
-				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to store default properties (IOException)");
+				Reporter.report("Unable to store default properties (IOException)", LogLevel.MINOR);
 			}
 		}
 
@@ -147,7 +148,7 @@ public class HeadGirl extends Application {
 			FONT_COLOR = Paint.valueOf(prop.getProperty("font_color", "000000"));
 			BACKGROUND_COLOR = Paint.valueOf(prop.getProperty("background_color", "FFFFFF"));
 		} catch (FileNotFoundException e) {
-			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to load properties as file doesn't exist, using defaults");
+			Reporter.report("Unable to load properties as file doesn't exist, using defaults", LogLevel.MINOR);
 			MAX_UPDATES = 9;
 			TIMEOUT = 1;
 			MESSAGE_LIFE = 300000;
@@ -159,7 +160,7 @@ public class HeadGirl extends Application {
 			FONT_COLOR = Paint.valueOf("000000");
 			BACKGROUND_COLOR = Paint.valueOf("FFFFFF");
 		} catch (IOException e) {
-			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to load properties (IO Exception), using defaults");
+			Reporter.report("Unable to load properties (IO Exception), using defaults", LogLevel.MINOR);
 			MAX_UPDATES = 9;
 			TIMEOUT = 1;
 			MESSAGE_LIFE = 300000;
