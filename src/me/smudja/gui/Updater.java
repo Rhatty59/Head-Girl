@@ -9,6 +9,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 
 import me.smudja.updater.TextUpdate;
+import me.smudja.updater.Update;
 import me.smudja.updater.UpdateManager;
 
 /**
@@ -22,13 +23,13 @@ public class Updater {
 	/**
 	 * updates - stores all current updates
 	 */
-	private ArrayList<TextUpdate> updates;
+	private ArrayList<Update> updates;
 	
 	private int numberMessages = 0;
 	public int messageToDisplay = -1;
 	
 	public Updater() {
-		updates = new ArrayList<TextUpdate>();
+		updates = new ArrayList<Update>();
 	}
 
 	public synchronized String update() {
@@ -36,9 +37,9 @@ public class Updater {
 		long currentTime = System.currentTimeMillis();
 		
 		// remove expired updates
-		Iterator<TextUpdate> iterator = updates.iterator();
+		Iterator<Update> iterator = updates.iterator();
 		while (iterator.hasNext()) {
-			TextUpdate item = iterator.next();
+			Update item = iterator.next();
 			if((currentTime - item.getRawDate()) > HeadGirl.getMessageLife()) {
 				iterator.remove();
 			}
@@ -51,7 +52,7 @@ public class Updater {
 		// if we have too many to display just take the most recent ones
 		if (updates.size() >= HeadGirl.getMaxUpdates()) {
 		    
-			ArrayList<TextUpdate> miniArray = new ArrayList<TextUpdate>();
+			ArrayList<Update> miniArray = new ArrayList<Update>();
 		    
 			for(int i = HeadGirl.getMaxUpdates(); i > 0; i--) {
 				miniArray.add(updates.get(updates.size()-i));
@@ -82,6 +83,7 @@ public class Updater {
 			
 			if (numberMessages == 0) {
 				messageToDisplay = -1;
+				return text = "No New Messages";
 			} else {
 				messageToDisplay += 1;
 				if (messageToDisplay >= numberMessages) {
@@ -94,18 +96,19 @@ public class Updater {
 			 * Let's now build the text message using StringBuilder
 			 */
 			
-				if (numberMessages > 0) {
-					textBuilder.append("[" + updates.get(messageToDisplay).getFirstName().toUpperCase() 
-						+ "] " + updates.get(messageToDisplay).getText() + "\n");
-					textBuilder.append("SENT: " + format.format(updates.get(messageToDisplay).getDate())
-						.toUpperCase() + "\n");
-				}
-		
-			if(textBuilder.length() == 0) {
-				text = "No New Messages";
-			} else {
-				text = textBuilder.toString().trim();
+			if (updates.get(messageToDisplay) instanceof TextUpdate) {
+				TextUpdate txtUpdate = (TextUpdate) updates.get(messageToDisplay);
+				textBuilder.append("[" + txtUpdate.getFirstName().toUpperCase() 
+					+ "] " + txtUpdate.getText() + "\n");
+				textBuilder.append("SENT: " + format.format(txtUpdate.getTimeReceived()).toUpperCase()
+						+ "\n");
 			}
+			else {
+				textBuilder.append("Photo Update Here");
+			}
+				
+			text = textBuilder.toString().trim();
+
 			return text;
 	}
 }

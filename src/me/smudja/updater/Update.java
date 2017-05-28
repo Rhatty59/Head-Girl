@@ -1,6 +1,9 @@
 package me.smudja.updater;
 
+import java.time.Instant;
 import java.util.Date;
+
+import org.json.simple.JSONObject;
 
 /**
  * Superclass for TextUpdate and PhotoUpdate classes
@@ -35,9 +38,13 @@ public abstract class Update {
 	 */
 	private Date time_received;
 	
-	protected Update() {}
-	
-	public abstract UpdateType getType();
+	protected Update(JSONObject jsonUpdate) {
+		update_id = (long) jsonUpdate.get("update_id");
+		user_id = (long) ((JSONObject)((JSONObject)jsonUpdate.get("message")).get("from")).get("id");
+		first_name = (String) ((JSONObject)((JSONObject)jsonUpdate.get("message")).get("from")).get("first_name");
+		raw_date = ((long) ((JSONObject)jsonUpdate.get("message")).get("date")) * 1000;
+		time_received = Date.from(Instant.ofEpochMilli(raw_date));
+	}
 	
 	/**
 	 * @return the update_id

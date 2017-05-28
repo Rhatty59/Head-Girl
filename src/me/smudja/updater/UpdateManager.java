@@ -111,15 +111,15 @@ public enum UpdateManager {
 	 * 
 	 * @return an array containing all valid and non-expired updates
 	 */
-	public TextUpdate[] getUpdates() {
-		ArrayList<TextUpdate> updatesList = new ArrayList<TextUpdate>();
-		TextUpdate[] updateArr;
+	public Update[] getUpdates() {
+		ArrayList<Update> updatesList = new ArrayList<Update>();
+		Update[] updateArr;
 		
 		// keep requesting updates from API until there are no more. High limit value will reduce the number of loops here (min 2 loops)
 		do {
 			updateArr = getUpdate();
 			if(!(updateArr == null)) {
-				for(TextUpdate update : updateArr) {
+				for(Update update : updateArr) {
 					updatesList.add(update);
 				}
 			}
@@ -128,9 +128,9 @@ public enum UpdateManager {
 		long currentTime = System.currentTimeMillis();
 		
 		// Remove expired updates
-		Iterator<TextUpdate> iterator = updatesList.iterator();
+		Iterator<Update> iterator = updatesList.iterator();
 		while (iterator.hasNext()) {
-			TextUpdate item = iterator.next();
+			Update item = iterator.next();
 			if((currentTime - item.getRawDate()) > HeadGirl.getMessageLife()) {
 				iterator.remove();
 			}
@@ -140,7 +140,7 @@ public enum UpdateManager {
 		if(!updatesList.isEmpty()) {
 			ring();
 		}
-		TextUpdate[] updates = new TextUpdate[]{};
+		Update[] updates = new Update[]{};
 		return updatesList.toArray(updates);
 	}
 	
@@ -148,7 +148,7 @@ public enum UpdateManager {
 	 * 
 	 * @return an array containing all updates from a single request to the API
 	 */
-	private TextUpdate[] getUpdate() {
+	private Update[] getUpdate() {
 		String query;
 		try {
 			query = String.format("%s=%s&%s=%s&%s=%s&%s=%s",
@@ -208,7 +208,7 @@ public enum UpdateManager {
 				offset = ((long)((JSONObject)result.get(result.size() - 1)).get("update_id")) + 1;
 			}
 			
-			ArrayList<TextUpdate> updatesList = new ArrayList<TextUpdate>();
+			ArrayList<Update> updatesList = new ArrayList<Update>();
 			
 			@SuppressWarnings("unchecked")
 			Iterator<JSONObject> iterator = result.iterator();
@@ -225,6 +225,7 @@ public enum UpdateManager {
 					updatesList.add(new TextUpdate(update));
 				}
 				else if (message.containsKey("photo")) {
+					Reporter.report("User sent a photo", LogLevel.DEBUG);
 				}
 				else {
 					Reporter.report("User sent invalid message (no text or photo field)", LogLevel.INFO);
@@ -232,16 +233,16 @@ public enum UpdateManager {
 			}
 			
 			// remove messages from unauthorised users
-			Iterator<TextUpdate> updateIterator = updatesList.iterator();
+			Iterator<Update> updateIterator = updatesList.iterator();
 			while(updateIterator.hasNext()) {
-				TextUpdate sel = updateIterator.next();
-				if(!(sel.valid()) || !(LongStream.of(authorised_users).anyMatch(x -> x == sel.getUserId()))) {
-					Reporter.report("Unauthorised user sent message to bot! User ID: " + sel.getUserId(), LogLevel.INFO);
+				Update sel = updateIterator.next();
+				if(!(LongStream.of(authorised_users).anyMatch(x -> x == sel.getUserID()))) {
+					Reporter.report("Unauthorised user sent message to bot! User ID: " + sel.getUserID(), LogLevel.INFO);
 					updateIterator.remove();
 				}
 			}
 			
-			TextUpdate[] updates = new TextUpdate[]{};
+			Update[] updates = new Update[]{};
 			
 			return updatesList.toArray(updates);
 		} catch (IOException ioExc) {
