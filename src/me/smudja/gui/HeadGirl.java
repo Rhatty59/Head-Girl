@@ -27,8 +27,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import utility.LogLevel;
-import utility.Reporter;
+import me.smudja.utility.LogLevel;
+import me.smudja.utility.Reporter;
 
 public class HeadGirl extends Application {
 	

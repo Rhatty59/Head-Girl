@@ -22,8 +22,8 @@ import org.json.simple.parser.ParseException;
 
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.image.Image;
-import utility.LogLevel;
-import utility.Reporter;
+import me.smudja.utility.LogLevel;
+import me.smudja.utility.Reporter;
 
 /**
  * @author smithl

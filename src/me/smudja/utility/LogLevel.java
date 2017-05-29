@@ -1,7 +1,7 @@
 /**
  * 
  */
-package utility;
+package me.smudja.utility;
 
 /**
  * @author smithl

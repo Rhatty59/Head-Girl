@@ -28,8 +28,8 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
 import me.smudja.gui.HeadGirl;
-import utility.LogLevel;
-import utility.Reporter;
+import me.smudja.utility.LogLevel;
+import me.smudja.utility.Reporter;
 
 /**
  * @author smithl
