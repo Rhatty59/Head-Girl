@@ -8,7 +8,6 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.text.DateFormat;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -26,6 +25,8 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
+import utility.LogLevel;
+import utility.Reporter;
 
 public class HeadGirl extends Application {
 	
@@ -113,13 +114,18 @@ public class HeadGirl extends Application {
 			} 
 			catch (FileAlreadyExistsException faeExc) {}
 			catch (IOException e) {
-				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to create properties file. Will try again on next init");
+				Reporter.report("Unable to create properties file. Will try again on next init", LogLevel.MINOR);
 			}
 			try(FileOutputStream output = new FileOutputStream("/usr/local/lib/headgirl/config/config.properties")) {
 				prop.setProperty("max_updates", "9");
 				prop.setProperty("timeout", "1");
+<<<<<<< HEAD
 				prop.setProperty("message_life", "1800000");
 				prop.setProperty("update_frequency", "30000");
+=======
+				prop.setProperty("message_life", "300000");
+				prop.setProperty("update_frequency", "10000");
+>>>>>>> d3563511c190c8b5fa5a2d48774f313f79f799d3
 				prop.setProperty("request_limit", "10");
 				prop.setProperty("window_width", "1200");
 				prop.setProperty("window_height", "600");
@@ -128,9 +134,9 @@ public class HeadGirl extends Application {
 				prop.setProperty("background_color", "FFFFFF");
 				prop.store(output, "Configuration file for Head Girl");
 			} catch (FileNotFoundException e) {
-				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to store default properties as file does not exist.");
+				Reporter.report("Unable to store default properties as file does not exist.", LogLevel.MINOR);
 			} catch (IOException e) {
-				System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to store default properties (IOException)");
+				Reporter.report("Unable to store default properties (IOException)", LogLevel.MINOR);
 			}
 		}
 
@@ -138,8 +144,13 @@ public class HeadGirl extends Application {
 			prop.load(input);
 			MAX_UPDATES = Integer.parseInt(prop.getProperty("max_updates", "9"));
 			TIMEOUT = Integer.parseInt(prop.getProperty("timeout", "1"));
+<<<<<<< HEAD
 			MESSAGE_LIFE = Integer.parseInt(prop.getProperty("message_life", "1800000"));
 			UPDATE_FREQUENCY = Integer.parseInt(prop.getProperty("update_frequency", "30000"));
+=======
+			MESSAGE_LIFE = Integer.parseInt(prop.getProperty("message_life", "300000"));
+			UPDATE_FREQUENCY = Integer.parseInt(prop.getProperty("update_frequency", "10000"));
+>>>>>>> d3563511c190c8b5fa5a2d48774f313f79f799d3
 			REQUEST_LIMIT = Integer.parseInt(prop.getProperty("request_limit", "10"));
 			WINDOW_WIDTH = Integer.parseInt(prop.getProperty("window_width", "1200"));
 			WINDOW_HEIGHT = Integer.parseInt(prop.getProperty("window_height", "600"));
@@ -147,11 +158,16 @@ public class HeadGirl extends Application {
 			FONT_COLOR = Paint.valueOf(prop.getProperty("font_color", "000000"));
 			BACKGROUND_COLOR = Paint.valueOf(prop.getProperty("background_color", "FFFFFF"));
 		} catch (FileNotFoundException e) {
-			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to load properties as file doesn't exist, using defaults");
+			Reporter.report("Unable to load properties as file doesn't exist, using defaults", LogLevel.MINOR);
 			MAX_UPDATES = 9;
 			TIMEOUT = 1;
+<<<<<<< HEAD
 			MESSAGE_LIFE = 1800000;
 			UPDATE_FREQUENCY = 30000;
+=======
+			MESSAGE_LIFE = 300000;
+			UPDATE_FREQUENCY = 10000;
+>>>>>>> d3563511c190c8b5fa5a2d48774f313f79f799d3
 			REQUEST_LIMIT = 10;
 			WINDOW_WIDTH = 1200;
 			WINDOW_HEIGHT = 600;
@@ -159,11 +175,16 @@ public class HeadGirl extends Application {
 			FONT_COLOR = Paint.valueOf("000000");
 			BACKGROUND_COLOR = Paint.valueOf("FFFFFF");
 		} catch (IOException e) {
-			System.out.println(DateFormat.getDateTimeInstance().format(System.currentTimeMillis()) + " [MINOR] " + "Unable to load properties (IO Exception), using defaults");
+			Reporter.report("Unable to load properties (IO Exception), using defaults", LogLevel.MINOR);
 			MAX_UPDATES = 9;
 			TIMEOUT = 1;
+<<<<<<< HEAD
 			MESSAGE_LIFE = 1800000;
 			UPDATE_FREQUENCY = 30000;
+=======
+			MESSAGE_LIFE = 300000;
+			UPDATE_FREQUENCY = 10000;
+>>>>>>> d3563511c190c8b5fa5a2d48774f313f79f799d3
 			REQUEST_LIMIT = 10;
 			WINDOW_WIDTH = 1200;
 			WINDOW_HEIGHT = 600;
