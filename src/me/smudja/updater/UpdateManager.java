@@ -107,6 +107,14 @@ public enum UpdateManager {
 		}
 	}
 	
+	public String getURL() {
+		return url;
+	}
+	
+	public String getToken() {
+		return token;
+	}
+	
 	/**
 	 * 
 	 * @return an array containing all valid and non-expired updates
@@ -225,7 +233,7 @@ public enum UpdateManager {
 					updatesList.add(new TextUpdate(update));
 				}
 				else if (message.containsKey("photo")) {
-					Reporter.report("User sent a photo", LogLevel.DEBUG);
+					updatesList.add(new PhotoUpdate(update));
 				}
 				else {
 					Reporter.report("User sent invalid message (no text or photo field)", LogLevel.INFO);

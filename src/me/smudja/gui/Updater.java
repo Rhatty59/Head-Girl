@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import me.smudja.updater.PhotoUpdate;
 import me.smudja.updater.TextUpdate;
 import me.smudja.updater.Update;
 import me.smudja.updater.UpdateManager;
@@ -32,7 +33,7 @@ public class Updater {
 		updates = new ArrayList<Update>();
 	}
 
-	public synchronized String update() {
+	public synchronized Object[] update() {
 		
 		long currentTime = System.currentTimeMillis();
 		
@@ -68,7 +69,6 @@ public class Updater {
 		
 		numberMessages = updates.size();  // are there any messages in the array?
 		
-			String text;
 			StringBuilder textBuilder = new StringBuilder();
 			SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM 'at' HH:mm");
 			
@@ -83,7 +83,7 @@ public class Updater {
 			
 			if (numberMessages == 0) {
 				messageToDisplay = -1;
-				return text = "No New Messages";
+				return new Object[]{"No New Messages", null};
 			} else {
 				messageToDisplay += 1;
 				if (messageToDisplay >= numberMessages) {
@@ -102,13 +102,13 @@ public class Updater {
 					+ "] " + txtUpdate.getText() + "\n");
 				textBuilder.append("SENT: " + format.format(txtUpdate.getTimeReceived()).toUpperCase()
 						+ "\n");
+				return new Object[]{ textBuilder.toString().trim(), null};
 			}
 			else {
-				textBuilder.append("Photo Update Here");
+				PhotoUpdate photoUpdate = (PhotoUpdate) updates.get(messageToDisplay);
+				textBuilder.append("SENT: " + format.format(photoUpdate.getTimeReceived()).toUpperCase()
+						+ "\n");
+				return new Object[]{ textBuilder.toString().trim(), photoUpdate.getPhoto()};
 			}
-				
-			text = textBuilder.toString().trim();
-
-			return text;
 	}
 }

@@ -17,6 +17,8 @@ import javafx.application.Platform;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.FlowPane;
@@ -188,15 +190,26 @@ public class HeadGirl extends Application {
 		primaryStage.setResizable(true);
 		primaryStage.setFullScreen(true);
 		
-		Text text = new Text(updater.update());
+		Object[] first_update = updater.update();
+		Text text = new Text((String) first_update[0]);
+		ImageView image = new ImageView();
+		image.setImage((Image) first_update[1]);
+		if(!(image.getImage() == null)) {
+			if (image.getImage().getWidth() > WINDOW_WIDTH) {
+				image.setFitWidth(WINDOW_WIDTH);
+			}
+			if (image.getImage().getHeight() > WINDOW_HEIGHT - 50) {
+				image.setFitHeight(WINDOW_HEIGHT - 50);
+			}
+		}
 		
 		text.setWrappingWidth(WINDOW_WIDTH);
 		text.setTextAlignment(TextAlignment.CENTER);
 		text.setFont(Font.font(FONT_SIZE));		
         text.setFill(FONT_COLOR);
 		
-		rootNode.getChildren().add(text);
-        
+		rootNode.getChildren().addAll(image, text);
+    
         Bounds textBounds = text.getBoundsInLocal();
         
         double font_size = text.getFont().getSize();
@@ -220,8 +233,20 @@ public class HeadGirl extends Application {
 						public void run() {
 							double font_size = FONT_SIZE;
 							
-							text.setText(updater.update());
+							Object[] update = updater.update();
+							
+							text.setText((String) update[0]);
 							text.setFont(Font.font(font_size));
+							
+							image.setImage((Image) update[1]);
+							if(!(image.getImage() == null)) {
+								if (image.getImage().getWidth() > WINDOW_WIDTH) {
+									image.setFitWidth(WINDOW_WIDTH);
+								}
+								if (image.getImage().getHeight() > WINDOW_HEIGHT - 50) {
+									image.setFitHeight(WINDOW_HEIGHT - 50);
+								}
+							}
 							
 							Bounds textBounds = text.getBoundsInLocal();
 							while(textBounds.getHeight() > WINDOW_HEIGHT) {
