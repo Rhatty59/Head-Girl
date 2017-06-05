@@ -195,6 +195,7 @@ public class HeadGirl extends Application {
 		ImageView image = new ImageView();
 		image.setImage((Image) first_update[1]);
 		if(!(image.getImage() == null)) {
+			image.setPreserveRatio(true);
 			if (image.getImage().getWidth() > WINDOW_WIDTH) {
 				image.setFitWidth(WINDOW_WIDTH);
 			}
@@ -240,6 +241,7 @@ public class HeadGirl extends Application {
 							
 							image.setImage((Image) update[1]);
 							if(!(image.getImage() == null)) {
+								image.setPreserveRatio(true);
 								if (image.getImage().getWidth() > WINDOW_WIDTH) {
 									image.setFitWidth(WINDOW_WIDTH);
 								}
