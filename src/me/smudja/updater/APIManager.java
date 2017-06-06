@@ -77,6 +77,10 @@ enum APIManager {
 		}
 	}
 	
+	public static APIManager getInstance() {
+		return INSTANCE;
+	}
+	
 	/**
 	 * 
 	 * @return an array containing all updates from a single request to the API

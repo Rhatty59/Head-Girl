@@ -38,12 +38,14 @@ public enum UpdateManager {
 	/**
 	 * offset - the update to begin looking for updates from, defaults to 0 for all unconfirmed updates.
 	 */
-	long offset = 0;
+	private long offset = 0;
 	
 	/**
 	 * allowed_updates - the type of update we want to receive
 	 */
-	String[] allowed_updates = {"message"};
+	private String[] allowed_updates = {"message"};
+	
+	private APIManager apiManager = APIManager.getInstance();
 
 	/**
 	 * constructor
@@ -64,6 +66,10 @@ public enum UpdateManager {
 			Reporter.report("Error instantiating UpdateManager. Shutting down...", LogLevel.FATAL);
 			System.exit(1);
 		}
+	}
+	
+	public static UpdateManager getInstance() {
+		return INSTANCE;
 	}
 	
 	/**
@@ -108,7 +114,7 @@ public enum UpdateManager {
 	 * @return an array containing all updates from a single request to the API
 	 */
 	private Update[] getUpdate() {	
-		JSONArray result = APIManager.INSTANCE.getUpdate(offset, HeadGirl.getRequestLimit(), HeadGirl.getTimeout(), allowed_updates);
+		JSONArray result = apiManager.getUpdate(offset, HeadGirl.getRequestLimit(), HeadGirl.getTimeout(), allowed_updates);
 
 		// if we have no new updates, return
 		Boolean updated = (result.size() == 0 ? false : true);

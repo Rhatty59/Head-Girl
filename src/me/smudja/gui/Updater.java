@@ -19,7 +19,9 @@ import me.smudja.updater.UpdateManager;
  * @author smithl
  *
  */
-public class Updater {
+public enum Updater {
+	
+	INSTANCE;
 	
 	/**
 	 * updates - stores all current updates
@@ -29,8 +31,14 @@ public class Updater {
 	private int numberMessages = 0;
 	public int messageToDisplay = -1;
 	
-	public Updater() {
+	private UpdateManager updateManager = UpdateManager.getInstance();
+	
+	Updater() {
 		updates = new ArrayList<Update>();
+	}
+	
+	public static Updater getInstance() {
+		return INSTANCE;
 	}
 
 	public synchronized Object[] update() {
@@ -47,20 +55,8 @@ public class Updater {
 		}
 		
 		// add any new updates
-		updates.addAll(Arrays.asList(UpdateManager.INSTANCE.getUpdates()));
+		updates.addAll(Arrays.asList(updateManager.getUpdates()));
 		
-		
-		// if we have too many to display just take the most recent ones
-		if (updates.size() >= HeadGirl.getMaxUpdates()) {
-		    
-			ArrayList<Update> miniArray = new ArrayList<Update>();
-		    
-			for(int i = HeadGirl.getMaxUpdates(); i > 0; i--) {
-				miniArray.add(updates.get(updates.size()-i));
-			}
-
-		    updates = miniArray;
-		}
 		/*
 		 * So in here, we take the array of messages [updates], with expired (30 minutes) deleted
 		 * and if we have too many (getMaxUpdates) also deleted (fix this in future versions)

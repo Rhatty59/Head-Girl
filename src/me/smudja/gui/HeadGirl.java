@@ -35,12 +35,7 @@ public class HeadGirl extends Application {
 	/**
 	 * version
 	 */
-	public final static String VERSION = "1.0a";
-	
-	/**
-	 * the maximum number of updates to be displayed at once
-	 */
-	private static int MAX_UPDATES;
+	public final static String VERSION = "1.0";
 	
 	/**
 	 * the time to wait for a response from the API
@@ -105,7 +100,7 @@ public class HeadGirl extends Application {
 
 	@Override
 	public void init() {
-		updater = new Updater();
+		updater = Updater.getInstance();
 		Properties prop = new Properties();
 		Path dir = Paths.get("").toAbsolutePath();
 		// if no properties file, create it
@@ -119,7 +114,6 @@ public class HeadGirl extends Application {
 				Reporter.report("Unable to create properties file. Will try again on next init", LogLevel.MINOR);
 			}
 			try(FileOutputStream output = new FileOutputStream("config/config.properties")) {
-				prop.setProperty("max_updates", "9");
 				prop.setProperty("timeout", "1");
 				prop.setProperty("message_life", "300000");
 				prop.setProperty("update_frequency", "10000");
@@ -139,7 +133,6 @@ public class HeadGirl extends Application {
 
 		try(FileInputStream input = new FileInputStream("config/config.properties")) {
 			prop.load(input);
-			MAX_UPDATES = Integer.parseInt(prop.getProperty("max_updates", "9"));
 			TIMEOUT = Integer.parseInt(prop.getProperty("timeout", "1"));
 			MESSAGE_LIFE = Integer.parseInt(prop.getProperty("message_life", "300000"));
 			UPDATE_FREQUENCY = Integer.parseInt(prop.getProperty("update_frequency", "10000"));
@@ -151,7 +144,6 @@ public class HeadGirl extends Application {
 			BACKGROUND_COLOR = Paint.valueOf(prop.getProperty("background_color", "FFFFFF"));
 		} catch (FileNotFoundException e) {
 			Reporter.report("Unable to load properties as file doesn't exist, using defaults", LogLevel.MINOR);
-			MAX_UPDATES = 9;
 			TIMEOUT = 1;
 			MESSAGE_LIFE = 300000;
 			UPDATE_FREQUENCY = 10000;
@@ -163,7 +155,6 @@ public class HeadGirl extends Application {
 			BACKGROUND_COLOR = Paint.valueOf("FFFFFF");
 		} catch (IOException e) {
 			Reporter.report("Unable to load properties (IO Exception), using defaults", LogLevel.MINOR);
-			MAX_UPDATES = 9;
 			TIMEOUT = 1;
 			MESSAGE_LIFE = 300000;
 			UPDATE_FREQUENCY = 10000;
@@ -261,14 +252,6 @@ public class HeadGirl extends Application {
 		            });
 		        }
 		    }, 0, HeadGirl.UPDATE_FREQUENCY);
-	}
-
-	/**
-	 * 
-	 * @return max_updates
-	 */
-	public static int getMaxUpdates() {
-		return MAX_UPDATES;
 	}
 
 	/**
