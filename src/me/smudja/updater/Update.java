@@ -1,9 +1,4 @@
-/**
- * 
- */
 package me.smudja.updater;
-
-import static org.apache.commons.lang3.StringEscapeUtils.unescapeJava;
 
 import java.time.Instant;
 import java.util.Date;
@@ -11,19 +6,12 @@ import java.util.Date;
 import org.json.simple.JSONObject;
 
 /**
- * @author smithl
+ * Superclass for TextUpdate and PhotoUpdate classes
  * 
- * Represents an singular message 'update' from the bot API
- *
+ * @author smithl
+ * @see TextUpdate, PhotoUpdate
  */
-public class Update {
-	
-	/**
-	 * Stores whether or not the update is valid.
-	 * true - if update is a message (has 'text' field)
-	 * false - if update has no 'text' field (i.e. photo, location, etc.)
-	 */
-	private boolean valid;
+public abstract class Update {
 	
 	/**
 	 * the id of the update
@@ -50,89 +38,49 @@ public class Update {
 	 */
 	private Date time_received;
 	
-	/**
-	 * the text of the update. Most likely, the message content.
-	 */
-	private String text;
-	
-	/**
-	 * Parses the JSONObject into this class.
-	 * 
-	 * @param jsonUpdate - a JSONObject storing the update.
-	 */
 	protected Update(JSONObject jsonUpdate) {
-		
 		update_id = (long) jsonUpdate.get("update_id");
 		user_id = (long) ((JSONObject)((JSONObject)jsonUpdate.get("message")).get("from")).get("id");
 		first_name = (String) ((JSONObject)((JSONObject)jsonUpdate.get("message")).get("from")).get("first_name");
 		raw_date = ((long) ((JSONObject)jsonUpdate.get("message")).get("date")) * 1000;
 		time_received = Date.from(Instant.ofEpochMilli(raw_date));
-		
-		// if the object contains no text then it is not valid.
-		if(!((JSONObject)jsonUpdate.get("message")).containsKey("text")) {
-			valid = false;
-			text = "";
-		}
-		else {
-			valid = true;
-			text = unescapeJava((String) ((JSONObject)jsonUpdate.get("message")).get("text"));
-		}	
 	}
 	
 	/**
-	 * 
-	 * @return valid - whether the update is a valid one i.e. contains 'text'
+	 * @return the update_id
 	 */
-	public boolean valid() {
-		return valid;
-	}
-	
-	/**
-	 * 
-	 * @return update_id
-	 */
-	public long getUpdateId() {
+	public long getUpdateID() {
 		return update_id;
 	}
-	
+
 	/**
-	 * 
-	 * @return user_id
+	 * @return the user_id
 	 */
-	public long getUserId() {
+	public long getUserID() {
 		return user_id;
 	}
-	
+
 	/**
-	 * 
-	 * @return first_name
+	 * @return the first_name
 	 */
 	public String getFirstName() {
 		return first_name;
 	}
-	
+
 	/**
-	 * 
-	 * @return raw_date
+	 * @return the raw_date
 	 */
 	public long getRawDate() {
 		return raw_date;
 	}
-	
+
 	/**
-	 * 
-	 * @return time_received
+	 * @return the time_received
 	 */
-	public Date getDate() {
+	public Date getTimeReceived() {
 		return time_received;
 	}
 	
-	/**
-	 * 
-	 * @return text
-	 */
-	public String getText() {
-		return text;
-	}
+	
 
 }

@@ -17,6 +17,8 @@ import javafx.application.Platform;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.Background;
 import javafx.scene.layout.BackgroundFill;
 import javafx.scene.layout.FlowPane;
@@ -25,20 +27,15 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
-import utility.LogLevel;
-import utility.Reporter;
+import me.smudja.utility.LogLevel;
+import me.smudja.utility.Reporter;
 
 public class HeadGirl extends Application {
 	
 	/**
 	 * version
 	 */
-	public final static String VERSION = "1.0a";
-	
-	/**
-	 * the maximum number of updates to be displayed at once
-	 */
-	private static int MAX_UPDATES;
+	public final static String VERSION = "1.0";
 	
 	/**
 	 * the time to wait for a response from the API
@@ -103,7 +100,7 @@ public class HeadGirl extends Application {
 
 	@Override
 	public void init() {
-		updater = new Updater();
+		updater = Updater.getInstance();
 		Properties prop = new Properties();
 		Path dir = Paths.get("").toAbsolutePath();
 		// if no properties file, create it
@@ -117,7 +114,6 @@ public class HeadGirl extends Application {
 				Reporter.report("Unable to create properties file. Will try again on next init", LogLevel.MINOR);
 			}
 			try(FileOutputStream output = new FileOutputStream("config/config.properties")) {
-				prop.setProperty("max_updates", "9");
 				prop.setProperty("timeout", "1");
 				prop.setProperty("message_life", "300000");
 				prop.setProperty("update_frequency", "10000");
@@ -137,7 +133,6 @@ public class HeadGirl extends Application {
 
 		try(FileInputStream input = new FileInputStream("config/config.properties")) {
 			prop.load(input);
-			MAX_UPDATES = Integer.parseInt(prop.getProperty("max_updates", "9"));
 			TIMEOUT = Integer.parseInt(prop.getProperty("timeout", "1"));
 			MESSAGE_LIFE = Integer.parseInt(prop.getProperty("message_life", "300000"));
 			UPDATE_FREQUENCY = Integer.parseInt(prop.getProperty("update_frequency", "10000"));
@@ -149,7 +144,6 @@ public class HeadGirl extends Application {
 			BACKGROUND_COLOR = Paint.valueOf(prop.getProperty("background_color", "FFFFFF"));
 		} catch (FileNotFoundException e) {
 			Reporter.report("Unable to load properties as file doesn't exist, using defaults", LogLevel.MINOR);
-			MAX_UPDATES = 9;
 			TIMEOUT = 1;
 			MESSAGE_LIFE = 300000;
 			UPDATE_FREQUENCY = 10000;
@@ -161,7 +155,6 @@ public class HeadGirl extends Application {
 			BACKGROUND_COLOR = Paint.valueOf("FFFFFF");
 		} catch (IOException e) {
 			Reporter.report("Unable to load properties (IO Exception), using defaults", LogLevel.MINOR);
-			MAX_UPDATES = 9;
 			TIMEOUT = 1;
 			MESSAGE_LIFE = 300000;
 			UPDATE_FREQUENCY = 10000;
@@ -188,15 +181,27 @@ public class HeadGirl extends Application {
 		primaryStage.setResizable(true);
 		primaryStage.setFullScreen(true);
 		
-		Text text = new Text(updater.update());
+		Object[] first_update = updater.update();
+		Text text = new Text((String) first_update[0]);
+		ImageView image = new ImageView();
+		image.setImage((Image) first_update[1]);
+		if(!(image.getImage() == null)) {
+			image.setPreserveRatio(true);
+			if (image.getImage().getWidth() > WINDOW_WIDTH) {
+				image.setFitWidth(WINDOW_WIDTH);
+			}
+			if (image.getImage().getHeight() > WINDOW_HEIGHT - 50) {
+				image.setFitHeight(WINDOW_HEIGHT - 50);
+			}
+		}
 		
 		text.setWrappingWidth(WINDOW_WIDTH);
 		text.setTextAlignment(TextAlignment.CENTER);
 		text.setFont(Font.font(FONT_SIZE));		
         text.setFill(FONT_COLOR);
 		
-		rootNode.getChildren().add(text);
-        
+		rootNode.getChildren().addAll(image, text);
+    
         Bounds textBounds = text.getBoundsInLocal();
         
         double font_size = text.getFont().getSize();
@@ -220,8 +225,21 @@ public class HeadGirl extends Application {
 						public void run() {
 							double font_size = FONT_SIZE;
 							
-							text.setText(updater.update());
+							Object[] update = updater.update();
+							
+							text.setText((String) update[0]);
 							text.setFont(Font.font(font_size));
+							
+							image.setImage((Image) update[1]);
+							if(!(image.getImage() == null)) {
+								image.setPreserveRatio(true);
+								if (image.getImage().getWidth() > WINDOW_WIDTH) {
+									image.setFitWidth(WINDOW_WIDTH);
+								}
+								if (image.getImage().getHeight() > WINDOW_HEIGHT - 50) {
+									image.setFitHeight(WINDOW_HEIGHT - 50);
+								}
+							}
 							
 							Bounds textBounds = text.getBoundsInLocal();
 							while(textBounds.getHeight() > WINDOW_HEIGHT) {
@@ -234,14 +252,6 @@ public class HeadGirl extends Application {
 		            });
 		        }
 		    }, 0, HeadGirl.UPDATE_FREQUENCY);
-	}
-
-	/**
-	 * 
-	 * @return max_updates
-	 */
-	public static int getMaxUpdates() {
-		return MAX_UPDATES;
 	}
 
 	/**

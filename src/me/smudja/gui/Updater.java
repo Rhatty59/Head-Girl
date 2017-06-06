@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
+import me.smudja.updater.PhotoUpdate;
+import me.smudja.updater.TextUpdate;
 import me.smudja.updater.Update;
 import me.smudja.updater.UpdateManager;
 
@@ -17,7 +19,9 @@ import me.smudja.updater.UpdateManager;
  * @author smithl
  *
  */
-public class Updater {
+public enum Updater {
+	
+	INSTANCE;
 	
 	/**
 	 * updates - stores all current updates
@@ -27,11 +31,17 @@ public class Updater {
 	private int numberMessages = 0;
 	public int messageToDisplay = -1;
 	
-	public Updater() {
+	private UpdateManager updateManager = UpdateManager.getInstance();
+	
+	Updater() {
 		updates = new ArrayList<Update>();
 	}
+	
+	public static Updater getInstance() {
+		return INSTANCE;
+	}
 
-	public synchronized String update() {
+	public synchronized Object[] update() {
 		
 		long currentTime = System.currentTimeMillis();
 		
@@ -45,20 +55,8 @@ public class Updater {
 		}
 		
 		// add any new updates
-		updates.addAll(Arrays.asList(UpdateManager.INSTANCE.getUpdates()));
+		updates.addAll(Arrays.asList(updateManager.getUpdates()));
 		
-		
-		// if we have too many to display just take the most recent ones
-		if (updates.size() >= HeadGirl.getMaxUpdates()) {
-		    
-			ArrayList<Update> miniArray = new ArrayList<Update>();
-		    
-			for(int i = HeadGirl.getMaxUpdates(); i > 0; i--) {
-				miniArray.add(updates.get(updates.size()-i));
-			}
-
-		    updates = miniArray;
-		}
 		/*
 		 * So in here, we take the array of messages [updates], with expired (30 minutes) deleted
 		 * and if we have too many (getMaxUpdates) also deleted (fix this in future versions)
@@ -67,7 +65,6 @@ public class Updater {
 		
 		numberMessages = updates.size();  // are there any messages in the array?
 		
-			String text;
 			StringBuilder textBuilder = new StringBuilder();
 			SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM 'at' HH:mm");
 			
@@ -82,6 +79,7 @@ public class Updater {
 			
 			if (numberMessages == 0) {
 				messageToDisplay = -1;
+				return new Object[]{"No New Messages", null};
 			} else {
 				messageToDisplay += 1;
 				if (messageToDisplay >= numberMessages) {
@@ -94,18 +92,19 @@ public class Updater {
 			 * Let's now build the text message using StringBuilder
 			 */
 			
-				if (numberMessages > 0) {
-					textBuilder.append("[" + updates.get(messageToDisplay).getFirstName().toUpperCase() 
-						+ "] " + updates.get(messageToDisplay).getText() + "\n");
-					textBuilder.append("SENT: " + format.format(updates.get(messageToDisplay).getDate())
-						.toUpperCase() + "\n");
-				}
-		
-			if(textBuilder.length() == 0) {
-				text = "No New Messages";
-			} else {
-				text = textBuilder.toString().trim();
+			if (updates.get(messageToDisplay) instanceof TextUpdate) {
+				TextUpdate txtUpdate = (TextUpdate) updates.get(messageToDisplay);
+				textBuilder.append("[" + txtUpdate.getFirstName().toUpperCase() 
+					+ "] " + txtUpdate.getText() + "\n");
+				textBuilder.append("SENT: " + format.format(txtUpdate.getTimeReceived()).toUpperCase()
+						+ "\n");
+				return new Object[]{ textBuilder.toString().trim(), null};
 			}
-			return text;
+			else {
+				PhotoUpdate photoUpdate = (PhotoUpdate) updates.get(messageToDisplay);
+				textBuilder.append("SENT: " + format.format(photoUpdate.getTimeReceived()).toUpperCase()
+						+ "\n");
+				return new Object[]{ textBuilder.toString().trim(), photoUpdate.getPhoto()};
+			}
 	}
 }
