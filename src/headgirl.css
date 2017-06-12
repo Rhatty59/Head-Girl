@@ -1,0 +1,32 @@
+.root {
+    -fx-font-size: 32pt;
+    -fx-font-family: "Courier New";
+    -fx-background: rgb(75, 75, 75);
+}
+
+#time {
+    -fx-text-fill: #FFFFFF;
+    -fx-background-color: rgb(30, 178, 146);
+    -fx-border-radius: 30;
+    -fx-background-radius: 30;
+    -fx-padding: 10;
+}
+
+#visitor {
+    -fx-text-fill: #FFFFFF;
+    -fx-background-color: rgb(30, 178, 146);
+    -fx-border-radius: 30;
+    -fx-background-radius: 30;
+    -fx-padding: 10;
+}
+
+#center {
+    -fx-background-color: rgb(125, 125, 125);
+    -fx-border-radius: 50;
+    -fx-background-radius: 50;
+    -fx-padding: 10;
+}
+
+#center-text {
+    -fx-fill: white;
+}

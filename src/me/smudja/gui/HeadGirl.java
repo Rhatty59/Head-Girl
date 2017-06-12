@@ -8,25 +8,33 @@ import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Properties;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import javafx.animation.Animation;
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
+import javafx.geometry.Rectangle2D;
+import javafx.scene.Node;
 import javafx.scene.Scene;
+import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.BackgroundFill;
+import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.paint.Paint;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import me.smudja.utility.LogLevel;
 import me.smudja.utility.Reporter;
 
@@ -61,33 +69,11 @@ public class HeadGirl extends Application {
 	private static int REQUEST_LIMIT;
 	
 	/**
-	 * width of window
-	 * (pixels)
-	 * needs to be set to screen resolution to ensure text fits correctly
-	 */
-	private static int WINDOW_WIDTH;
-	
-	/**
-	 * height of window
-	 * (pixels)
-	 * needs to be set to screen resolution to ensure text fits correctly
-	 */
-	private static int WINDOW_HEIGHT;
-	
-	/**
 	 * default font size for text display
 	 */
 	private static int FONT_SIZE;
 	
-	/**
-	 * font color (HTML format)
-	 */
-	private static Paint FONT_COLOR;
-	
-	/**
-	 * background color (HTML format)
-	 */
-	private static Paint BACKGROUND_COLOR;
+	private Rectangle2D screenBounds;
 	
 	/**
 	 * updater instance
@@ -118,11 +104,7 @@ public class HeadGirl extends Application {
 				prop.setProperty("message_life", "300000");
 				prop.setProperty("update_frequency", "10000");
 				prop.setProperty("request_limit", "10");
-				prop.setProperty("window_width", "1200");
-				prop.setProperty("window_height", "600");
 				prop.setProperty("font_size", "60");
-				prop.setProperty("font_color", "000000");
-				prop.setProperty("background_color", "FFFFFF");
 				prop.store(output, "Configuration file for Head Girl");
 			} catch (FileNotFoundException e) {
 				Reporter.report("Unable to store default properties as file does not exist.", LogLevel.MINOR);
@@ -137,34 +119,23 @@ public class HeadGirl extends Application {
 			MESSAGE_LIFE = Integer.parseInt(prop.getProperty("message_life", "300000"));
 			UPDATE_FREQUENCY = Integer.parseInt(prop.getProperty("update_frequency", "10000"));
 			REQUEST_LIMIT = Integer.parseInt(prop.getProperty("request_limit", "10"));
-			WINDOW_WIDTH = Integer.parseInt(prop.getProperty("window_width", "1200"));
-			WINDOW_HEIGHT = Integer.parseInt(prop.getProperty("window_height", "600"));
 			FONT_SIZE = Integer.parseInt(prop.getProperty("font_size", "60"));
-			FONT_COLOR = Paint.valueOf(prop.getProperty("font_color", "000000"));
-			BACKGROUND_COLOR = Paint.valueOf(prop.getProperty("background_color", "FFFFFF"));
 		} catch (FileNotFoundException e) {
 			Reporter.report("Unable to load properties as file doesn't exist, using defaults", LogLevel.MINOR);
 			TIMEOUT = 1;
 			MESSAGE_LIFE = 300000;
 			UPDATE_FREQUENCY = 10000;
 			REQUEST_LIMIT = 10;
-			WINDOW_WIDTH = 1200;
-			WINDOW_HEIGHT = 600;
 			FONT_SIZE = 60;
-			FONT_COLOR = Paint.valueOf("000000");
-			BACKGROUND_COLOR = Paint.valueOf("FFFFFF");
 		} catch (IOException e) {
 			Reporter.report("Unable to load properties (IO Exception), using defaults", LogLevel.MINOR);
 			TIMEOUT = 1;
 			MESSAGE_LIFE = 300000;
 			UPDATE_FREQUENCY = 10000;
 			REQUEST_LIMIT = 10;
-			WINDOW_WIDTH = 1200;
-			WINDOW_HEIGHT = 600;
 			FONT_SIZE = 60;
-			FONT_COLOR = Paint.valueOf("000000");
-			BACKGROUND_COLOR = Paint.valueOf("FFFFFF");
 		}
+		screenBounds = Screen.getPrimary().getVisualBounds();
 	}
 	
 	@Override
@@ -172,46 +143,14 @@ public class HeadGirl extends Application {
 		
 		primaryStage.setTitle("Head Girl v" + VERSION);
 		
-		FlowPane rootNode = new FlowPane();
-		rootNode.setAlignment(Pos.CENTER);
-		rootNode.setMaxSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-		rootNode.setBackground(new Background(new BackgroundFill(BACKGROUND_COLOR, null, null)));
-		
-		primaryStage.setScene(new Scene(rootNode, WINDOW_WIDTH, WINDOW_HEIGHT));
-		primaryStage.setResizable(true);
-		primaryStage.setFullScreen(true);
-		
-		Object[] first_update = updater.update();
-		Text text = new Text((String) first_update[0]);
-		ImageView image = new ImageView();
-		image.setImage((Image) first_update[1]);
-		if(!(image.getImage() == null)) {
-			image.setPreserveRatio(true);
-			if (image.getImage().getWidth() > WINDOW_WIDTH) {
-				image.setFitWidth(WINDOW_WIDTH);
-			}
-			if (image.getImage().getHeight() > WINDOW_HEIGHT - 50) {
-				image.setFitHeight(WINDOW_HEIGHT - 50);
-			}
-		}
-		
-		text.setWrappingWidth(WINDOW_WIDTH);
-		text.setTextAlignment(TextAlignment.CENTER);
-		text.setFont(Font.font(FONT_SIZE));		
-        text.setFill(FONT_COLOR);
-		
-		rootNode.getChildren().addAll(image, text);
-    
-        Bounds textBounds = text.getBoundsInLocal();
-        
-        double font_size = text.getFont().getSize();
-        
-        // rescale text size so that it fits on screen
-        while(textBounds.getHeight() > WINDOW_HEIGHT) {
-        	font_size--;
-        	text.setFont(Font.font(font_size));
-        	textBounds = text.getBoundsInLocal();
-        }
+		BorderPane rootNode = new BorderPane();
+    	primaryStage.setScene( new Scene( rootNode ) );
+    	primaryStage.setFullScreen(true);
+    	primaryStage.setFullScreenExitHint("");
+    	primaryStage.getScene().getStylesheets().add("headgirl.css");
+    	
+    	rootNode.setTop(top());
+    	rootNode.setCenter(center(updater.update()));
 		
 		primaryStage.show();
 		
@@ -223,30 +162,9 @@ public class HeadGirl extends Application {
 
 						@Override
 						public void run() {
-							double font_size = FONT_SIZE;
-							
 							Object[] update = updater.update();
 							
-							text.setText((String) update[0]);
-							text.setFont(Font.font(font_size));
-							
-							image.setImage((Image) update[1]);
-							if(!(image.getImage() == null)) {
-								image.setPreserveRatio(true);
-								if (image.getImage().getWidth() > WINDOW_WIDTH) {
-									image.setFitWidth(WINDOW_WIDTH);
-								}
-								if (image.getImage().getHeight() > WINDOW_HEIGHT - 50) {
-									image.setFitHeight(WINDOW_HEIGHT - 50);
-								}
-							}
-							
-							Bounds textBounds = text.getBoundsInLocal();
-							while(textBounds.getHeight() > WINDOW_HEIGHT) {
-								font_size--;
-								text.setFont(Font.font(font_size));
-								textBounds = text.getBoundsInLocal();
-							}
+							rootNode.setCenter(center(update));
 						}
 		            	
 		            });
@@ -284,5 +202,69 @@ public class HeadGirl extends Application {
 	 */
 	public static int getRequestLimit() {
 		return REQUEST_LIMIT;
+	}
+	
+	private FlowPane top() {
+		FlowPane topNode = new FlowPane();
+        topNode.setAlignment(Pos.CENTER_RIGHT);
+        
+        Label timeLbl = new Label();
+        timeLbl.setId("time");
+        topNode.getChildren().add(timeLbl);
+        
+        DateFormat timeFormat = new SimpleDateFormat( "HH:mm:ss" );
+        final Timeline timeline = new Timeline(
+            new KeyFrame(
+                Duration.millis( 500 ),
+                event -> {
+                    timeLbl.setText( timeFormat.format( System.currentTimeMillis() ) );
+                }
+            )
+        );
+        timeline.setCycleCount( Animation.INDEFINITE );
+        timeline.play();
+        
+        return topNode;
+	}
+	
+	private Node center(Object[] update) {
+		FlowPane centerNode = new FlowPane();
+		centerNode.setAlignment(Pos.CENTER);
+		centerNode.setId("center");
+		
+		Text text = new Text((String) update[0]);
+		ImageView image = new ImageView();
+		image.setImage((Image) update[1]);
+		if(!(image.getImage() == null)) {
+			image.setPreserveRatio(true);
+			if (image.getImage().getWidth() > screenBounds.getWidth()) {
+				image.setFitWidth(screenBounds.getWidth());
+			}
+			if (image.getImage().getHeight() > (screenBounds.getHeight() - 150)) {
+				image.setFitHeight(screenBounds.getHeight() - 150);
+			}
+		}
+		
+		text.setWrappingWidth(screenBounds.getWidth());
+		text.setTextAlignment(TextAlignment.CENTER);
+		
+		centerNode.getChildren().addAll(image, text);
+		
+		text.setId("center-text");
+		text.applyCss();
+		text.setFont(Font.font(FONT_SIZE));
+    
+        Bounds textBounds = text.getLayoutBounds();
+        
+        double font_size = text.getFont().getSize();
+        
+        // rescale text size so that it fits on screen
+        while(textBounds.getHeight() > (screenBounds.getHeight()- 50)) {
+        	font_size--;
+        	text.setFont(Font.font(font_size));
+        	textBounds = text.getLayoutBounds();
+        }
+		
+		return centerNode;
 	}
 }
