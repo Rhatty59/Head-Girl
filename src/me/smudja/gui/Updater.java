@@ -19,7 +19,6 @@ import me.smudja.updater.UpdateManager;
 
 /**
  * Deals with removing expired updates and adding new updates.
- * Also, styles text.
  * @author smithl
  *
  */
@@ -32,9 +31,16 @@ public enum Updater {
 	 */
 	private ArrayList<Update> updates;
 	
-	private int numberMessages = 0;
-	public int messageToDisplay = -1;
+	/**
+	 * index of update we need to display
+	 */
+	public int updateToDisplay = -1;
 	
+	/**
+	 * instance of UpdateManager
+	 * 
+	 * @see UpdateManager
+	 */
 	private UpdateManager updateManager = UpdateManager.getInstance();
 	
 	Updater() {
@@ -45,6 +51,11 @@ public enum Updater {
 		return INSTANCE;
 	}
 
+	/**
+	 * Updates array with new updates, removes old updates and returns next update node to be displayed
+	 * 
+	 * @return update node to be displayed
+	 */
 	public synchronized Node update() {
 		
 		long currentTime = System.currentTimeMillis();
@@ -60,15 +71,6 @@ public enum Updater {
 		
 		// add any new updates
 		updates.addAll(Arrays.asList(updateManager.getUpdates()));
-		
-		/*
-		 * So in here, we take the array of messages [updates], with expired (30 minutes) deleted
-		 * and if we have too many (getMaxUpdates) also deleted (fix this in future versions)
-		 * and .get(messageToDisplay) and display each one every 30 seconds.
-		 */
-		
-		numberMessages = updates.size();  // are there any messages in the array?
-		
 			
 			/* 
 			 * The block of code below checks if there are any messages and if
@@ -79,20 +81,24 @@ public enum Updater {
 			 * if it has reached the end of the array.
 			 */
 
-		if (numberMessages == 0) {
-			messageToDisplay = -1;
+		if (updates.size() == 0) {
+			updateToDisplay = -1;
 
 			return getDateNode();
 		} else {
-			messageToDisplay += 1;
-			if (messageToDisplay >= numberMessages) {
-				messageToDisplay = 0;
+			updateToDisplay += 1;
+			if (updateToDisplay >= updates.size()) {
+				updateToDisplay = 0;
 			}
 		}
 
-		return updates.get(messageToDisplay).getNode();
+		return updates.get(updateToDisplay).getNode();
 	}
 
+	/**
+	 * Creates a node just displaying the current system date
+	 * @return node containing current system date
+	 */
 	private Node getDateNode() {
 
 		SimpleDateFormat format = new SimpleDateFormat("EEEE dd MMMM yyyy");

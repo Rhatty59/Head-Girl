@@ -29,6 +29,15 @@ import javafx.util.Duration;
 import me.smudja.utility.LogLevel;
 import me.smudja.utility.Reporter;
 
+/**
+ * Entry point for the application.
+ * 
+ * Handles loading of configuration from properties file, creating of primary stage including top node
+ * and scheduling update checks.
+ * 
+ * @author smithl
+ *
+ */
 public class HeadGirl extends Application {
 	
 	/**
@@ -68,14 +77,27 @@ public class HeadGirl extends Application {
 	 * updater instance
 	 */
 	private Updater updater;
-
+	
+	/**
+	 * entry point
+	 * 
+	 * @param args
+	 */
 	public static void main(String[] args) {
 		launch(args);
 	}
 
+	/**
+	 * called before scene is shown. Handles initial setup
+	 * Loads config and initialises updater
+	 * 
+	 * @see Updater
+	 */
 	@Override
 	public void init() {
+		// initialise Updater
 		updater = Updater.getInstance();
+		
 		Properties prop = new Properties();
 		Path dir = Paths.get("").toAbsolutePath();
 		// if no properties file, create it
@@ -102,6 +124,7 @@ public class HeadGirl extends Application {
 			}
 		}
 
+		// load properties file (we now know it exists)
 		try(FileInputStream input = new FileInputStream("config/config.properties")) {
 			prop.load(input);
 			TIMEOUT = Integer.parseInt(prop.getProperty("timeout", "1"));
@@ -126,6 +149,9 @@ public class HeadGirl extends Application {
 		}
 	}
 	
+	/**
+	 * handles display of application
+	 */
 	@Override
 	public void start(Stage primaryStage) {
 		
@@ -142,6 +168,7 @@ public class HeadGirl extends Application {
 		
 		primaryStage.show();
 		
+		//schedule update checks
 		Timer timer = new Timer();
 		timer.scheduleAtFixedRate(new TimerTask() {
 		        @Override
@@ -191,10 +218,18 @@ public class HeadGirl extends Application {
 		return REQUEST_LIMIT;
 	}
 	
+	/**
+	 * 
+	 * @return font_size
+	 */
 	public static int getFontSize() {
 		return FONT_SIZE;
 	}
 	
+	/**
+	 * creates top node which will display the current system time
+	 * @return node containing system time label
+	 */
 	private FlowPane top() {
 		FlowPane topNode = new FlowPane();
         topNode.setAlignment(Pos.CENTER_RIGHT);
@@ -204,6 +239,8 @@ public class HeadGirl extends Application {
         topNode.getChildren().add(timeLbl);
         
         DateFormat timeFormat = new SimpleDateFormat( "HH:mm:ss" );
+        
+        // update time every 0.5 secs
         final Timeline timeline = new Timeline(
             new KeyFrame(
                 Duration.millis( 500 ),
@@ -212,6 +249,7 @@ public class HeadGirl extends Application {
                 }
             )
         );
+        // run indefinitely
         timeline.setCycleCount( Animation.INDEFINITE );
         timeline.play();
         

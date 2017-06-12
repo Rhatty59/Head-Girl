@@ -21,15 +21,19 @@ import me.smudja.utility.LogLevel;
 import me.smudja.utility.Reporter;
 
 /**
+ * An update representing a photo sent to HeadGirl
  * @author smithl
  *
  */
 public class PhotoUpdate extends Update {
 	
+	/**
+	 * the image
+	 */
 	Image photo;
 
 	/**
-	 * 
+	 * constructor - calls APIManager to retrieve update
 	 */
 	public PhotoUpdate(JSONObject jsonUpdate) {
 		super(jsonUpdate);
@@ -53,10 +57,17 @@ public class PhotoUpdate extends Update {
 		photo = APIManager.INSTANCE.getImageFile(file_id);
 	}
 	
+	/**
+	 * 
+	 * @return image
+	 */
 	public Image getPhoto() {
 		return photo;
 	}
 
+	/**
+	 * @return node representing this update
+	 */
 	@Override
 	public Node getNode() {
 		Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();

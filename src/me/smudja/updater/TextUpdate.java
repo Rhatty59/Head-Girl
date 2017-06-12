@@ -22,7 +22,7 @@ import javafx.stage.Screen;
 import me.smudja.gui.HeadGirl;
 
 /**
- *  Represents an singular message 'update' from the bot API
+ *  Represents an singular message 'update' from the API
  *  
  * @author smithl
  */
@@ -52,6 +52,10 @@ public class TextUpdate extends Update {
 		return text;
 	}
 
+	/**
+	 * configures how we want this update to be displayed
+	 * @return node representing this update
+	 */
 	@Override
 	public Node getNode() {
 		Rectangle2D screenBounds = Screen.getPrimary().getVisualBounds();

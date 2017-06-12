@@ -48,6 +48,10 @@ public abstract class Update {
 		time_received = Date.from(Instant.ofEpochMilli(raw_date));
 	}
 	
+	/**
+	 * abstract method to create node defining how to display this update on screen
+	 * @return node representing this update
+	 */
 	public abstract Node getNode();
 	
 	/**
