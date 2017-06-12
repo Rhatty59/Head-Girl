@@ -29,6 +29,9 @@ import me.smudja.utility.LogLevel;
 import me.smudja.utility.Reporter;
 
 /**
+ * actually makes requests to Telegram API.
+ * also handles photo retrieval
+ * 
  * @author smithl
  *
  */
@@ -82,7 +85,7 @@ enum APIManager {
 	}
 	
 	/**
-	 * 
+	 *  request update from API
 	 * @return an array containing all updates from a single request to the API
 	 */
 	public JSONArray getUpdate(long offset, int limit, int timeout, String[] allowed_updates) {
@@ -141,6 +144,11 @@ enum APIManager {
 		}
 	}
 	
+	/**
+	 * request image file from API
+	 * @param file_id - the ID of the file we want (given to us by getUpdates)
+	 * @return image from API
+	 */
 	public Image getImageFile(String file_id) {
 
 		String query;

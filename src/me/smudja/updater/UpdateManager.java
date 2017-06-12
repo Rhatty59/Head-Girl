@@ -23,8 +23,11 @@ import me.smudja.utility.LogLevel;
 import me.smudja.utility.Reporter;
 
 /**
+ * handles getting of updates using APIManager.
+ * Parses response from APIManager and removes unauthorised updates
+ * 
  * @author smithl
- *
+ * @see APIManager
  */
 public enum UpdateManager {
 	
@@ -45,10 +48,13 @@ public enum UpdateManager {
 	 */
 	private String[] allowed_updates = {"message"};
 	
+	/**
+	 * APIManager
+	 */
 	private APIManager apiManager = APIManager.getInstance();
 
 	/**
-	 * constructor
+	 * constructor reads in config information
 	 */
 	private UpdateManager() {
 		try {
@@ -140,6 +146,7 @@ public enum UpdateManager {
 			update = iterator.next();
 			message = (JSONObject) update.get("message");
 			if (message.containsKey("text")) {
+			// this is a text update
 				txtUpdate = new TextUpdate(update);
 				updatesList.add(txtUpdate);
 				
@@ -149,6 +156,7 @@ public enum UpdateManager {
 						, LogLevel.INFO);
 			}
 			else if (message.containsKey("photo")) {
+			// this is a photo update
 				photoUpdate = new PhotoUpdate(update);
 				updatesList.add(photoUpdate);
 				
