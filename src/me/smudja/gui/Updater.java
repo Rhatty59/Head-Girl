@@ -8,8 +8,12 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 
-import me.smudja.updater.PhotoUpdate;
-import me.smudja.updater.TextUpdate;
+import javafx.geometry.Pos;
+import javafx.scene.Node;
+import javafx.scene.layout.FlowPane;
+import javafx.scene.text.Font;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextAlignment;
 import me.smudja.updater.Update;
 import me.smudja.updater.UpdateManager;
 
@@ -41,7 +45,7 @@ public enum Updater {
 		return INSTANCE;
 	}
 
-	public synchronized Object[] update() {
+	public synchronized Node update() {
 		
 		long currentTime = System.currentTimeMillis();
 		
@@ -65,8 +69,6 @@ public enum Updater {
 		
 		numberMessages = updates.size();  // are there any messages in the array?
 		
-			StringBuilder textBuilder = new StringBuilder();
-			SimpleDateFormat format = new SimpleDateFormat("EEE, dd MMM 'at' HH:mm");
 			
 			/* 
 			 * The block of code below checks if there are any messages and if
@@ -76,35 +78,39 @@ public enum Updater {
 			 * the second if statement cycles the messageToDisplay back to array record 0
 			 * if it has reached the end of the array.
 			 */
-			
-			if (numberMessages == 0) {
-				messageToDisplay = -1;
-				return new Object[]{"No New Messages", null};
-			} else {
-				messageToDisplay += 1;
-				if (messageToDisplay >= numberMessages) {
-					messageToDisplay = 0;
-				}
+
+		if (numberMessages == 0) {
+			messageToDisplay = -1;
+
+			return getDateNode();
+		} else {
+			messageToDisplay += 1;
+			if (messageToDisplay >= numberMessages) {
+				messageToDisplay = 0;
 			}
-			
-			/*
-			 * messageToDisplay now contains, well, the next messageToDisplay!
-			 * Let's now build the text message using StringBuilder
-			 */
-			
-			if (updates.get(messageToDisplay) instanceof TextUpdate) {
-				TextUpdate txtUpdate = (TextUpdate) updates.get(messageToDisplay);
-				textBuilder.append("[" + txtUpdate.getFirstName().toUpperCase() 
-					+ "] " + txtUpdate.getText() + "\n");
-				textBuilder.append("SENT: " + format.format(txtUpdate.getTimeReceived()).toUpperCase()
-						+ "\n");
-				return new Object[]{ textBuilder.toString().trim(), null};
-			}
-			else {
-				PhotoUpdate photoUpdate = (PhotoUpdate) updates.get(messageToDisplay);
-				textBuilder.append("SENT: " + format.format(photoUpdate.getTimeReceived()).toUpperCase()
-						+ "\n");
-				return new Object[]{ textBuilder.toString().trim(), photoUpdate.getPhoto()};
-			}
+		}
+
+		return updates.get(messageToDisplay).getNode();
+	}
+
+	private Node getDateNode() {
+
+		SimpleDateFormat format = new SimpleDateFormat("EEEE dd MMMM yyyy");
+
+		FlowPane dateNode = new FlowPane();
+		dateNode.setAlignment(Pos.CENTER);
+		dateNode.setId("center");
+
+		Text text = new Text(format.format(System.currentTimeMillis()));
+
+		text.setTextAlignment(TextAlignment.CENTER);
+		
+		dateNode.getChildren().addAll(text);
+		
+		text.setId("center-text");
+		text.applyCss();
+		text.setFont(Font.font(HeadGirl.getFontSize()));
+		
+		return dateNode;
 	}
 }

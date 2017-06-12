@@ -19,20 +19,11 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
-import javafx.geometry.Bounds;
 import javafx.geometry.Pos;
-import javafx.geometry.Rectangle2D;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.FlowPane;
-import javafx.scene.text.Font;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextAlignment;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import me.smudja.utility.LogLevel;
@@ -72,8 +63,6 @@ public class HeadGirl extends Application {
 	 * default font size for text display
 	 */
 	private static int FONT_SIZE;
-	
-	private Rectangle2D screenBounds;
 	
 	/**
 	 * updater instance
@@ -135,7 +124,6 @@ public class HeadGirl extends Application {
 			REQUEST_LIMIT = 10;
 			FONT_SIZE = 60;
 		}
-		screenBounds = Screen.getPrimary().getVisualBounds();
 	}
 	
 	@Override
@@ -150,7 +138,7 @@ public class HeadGirl extends Application {
     	primaryStage.getScene().getStylesheets().add("headgirl.css");
     	
     	rootNode.setTop(top());
-    	rootNode.setCenter(center(updater.update()));
+    	rootNode.setCenter(updater.update());
 		
 		primaryStage.show();
 		
@@ -162,9 +150,8 @@ public class HeadGirl extends Application {
 
 						@Override
 						public void run() {
-							Object[] update = updater.update();
 							
-							rootNode.setCenter(center(update));
+							rootNode.setCenter(updater.update());
 						}
 		            	
 		            });
@@ -204,6 +191,10 @@ public class HeadGirl extends Application {
 		return REQUEST_LIMIT;
 	}
 	
+	public static int getFontSize() {
+		return FONT_SIZE;
+	}
+	
 	private FlowPane top() {
 		FlowPane topNode = new FlowPane();
         topNode.setAlignment(Pos.CENTER_RIGHT);
@@ -227,44 +218,4 @@ public class HeadGirl extends Application {
         return topNode;
 	}
 	
-	private Node center(Object[] update) {
-		FlowPane centerNode = new FlowPane();
-		centerNode.setAlignment(Pos.CENTER);
-		centerNode.setId("center");
-		
-		Text text = new Text((String) update[0]);
-		ImageView image = new ImageView();
-		image.setImage((Image) update[1]);
-		if(!(image.getImage() == null)) {
-			image.setPreserveRatio(true);
-			if (image.getImage().getWidth() > screenBounds.getWidth()) {
-				image.setFitWidth(screenBounds.getWidth());
-			}
-			if (image.getImage().getHeight() > (screenBounds.getHeight() - 150)) {
-				image.setFitHeight(screenBounds.getHeight() - 150);
-			}
-		}
-		
-		text.setWrappingWidth(screenBounds.getWidth());
-		text.setTextAlignment(TextAlignment.CENTER);
-		
-		centerNode.getChildren().addAll(image, text);
-		
-		text.setId("center-text");
-		text.applyCss();
-		text.setFont(Font.font(FONT_SIZE));
-    
-        Bounds textBounds = text.getLayoutBounds();
-        
-        double font_size = text.getFont().getSize();
-        
-        // rescale text size so that it fits on screen
-        while(textBounds.getHeight() > (screenBounds.getHeight()- 50)) {
-        	font_size--;
-        	text.setFont(Font.font(font_size));
-        	textBounds = text.getLayoutBounds();
-        }
-		
-		return centerNode;
-	}
 }

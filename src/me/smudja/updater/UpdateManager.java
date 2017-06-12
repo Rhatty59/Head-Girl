@@ -133,15 +133,29 @@ public enum UpdateManager {
 
 		JSONObject update;
 		JSONObject message;
+		TextUpdate txtUpdate;
+		PhotoUpdate photoUpdate;
 
 		while(iterator.hasNext()) {
 			update = iterator.next();
 			message = (JSONObject) update.get("message");
 			if (message.containsKey("text")) {
-				updatesList.add(new TextUpdate(update));
+				txtUpdate = new TextUpdate(update);
+				updatesList.add(txtUpdate);
+				
+				Reporter.report(
+						"User sent text message: " + txtUpdate.getUserID()
+						+ " [" + txtUpdate.getFirstName() + "] " + "- " + txtUpdate.getText()
+						, LogLevel.INFO);
 			}
 			else if (message.containsKey("photo")) {
-				updatesList.add(new PhotoUpdate(update));
+				photoUpdate = new PhotoUpdate(update);
+				updatesList.add(photoUpdate);
+				
+				Reporter.report(
+						"User sent photo message: " + photoUpdate.getUserID()
+						+ " [" + photoUpdate.getFirstName() + "]"
+						, LogLevel.INFO);
 			}
 			else {
 				Reporter.report("User sent invalid message (no text or photo field)", LogLevel.INFO);
