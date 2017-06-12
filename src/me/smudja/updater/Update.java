@@ -5,6 +5,8 @@ import java.util.Date;
 
 import org.json.simple.JSONObject;
 
+import javafx.scene.Node;
+
 /**
  * Superclass for TextUpdate and PhotoUpdate classes
  * 
@@ -45,6 +47,8 @@ public abstract class Update {
 		raw_date = ((long) ((JSONObject)jsonUpdate.get("message")).get("date")) * 1000;
 		time_received = Date.from(Instant.ofEpochMilli(raw_date));
 	}
+	
+	public abstract Node getNode();
 	
 	/**
 	 * @return the update_id
