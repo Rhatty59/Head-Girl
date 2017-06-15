@@ -1,11 +1,12 @@
 /**
  * 
  */
-package utility;
+package me.smudja.utility;
 
 import java.text.DateFormat;
 
 /**
+ * Displays log information in an easy to read format
  * @author smithl
  *
  */
