@@ -249,12 +249,13 @@ public class HeadGirl extends Application {
         timeLbl.setId("time");
         topNode.getChildren().add(timeLbl);
         
-        DateFormat timeFormat = new SimpleDateFormat( "HH:mm:ss" );
+        DateFormat timeFormat = new SimpleDateFormat( "HH:mm" );
+        timeLbl.setText( timeFormat.format( System.currentTimeMillis() ) );
         
         // update time every 0.5 secs
         final Timeline timeline = new Timeline(
             new KeyFrame(
-                Duration.millis( 500 ),
+                Duration.millis( 30000 ),
                 event -> {
                     timeLbl.setText( timeFormat.format( System.currentTimeMillis() ) );
                 }

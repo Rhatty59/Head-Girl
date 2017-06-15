@@ -10,10 +10,11 @@ import java.util.Iterator;
 
 import javafx.geometry.Pos;
 import javafx.scene.Node;
-import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextAlignment;
+import me.rhett.reminder.Reminder;
 import me.smudja.updater.Update;
 import me.smudja.updater.UpdateManager;
 
@@ -34,7 +35,7 @@ public enum Updater {
 	/**
 	 * index of update we need to display
 	 */
-	public int updateToDisplay = -1;
+	private int updateToDisplay = -1;
 	
 	/**
 	 * instance of UpdateManager
@@ -42,6 +43,13 @@ public enum Updater {
 	 * @see UpdateManager
 	 */
 	private UpdateManager updateManager = UpdateManager.getInstance();
+	
+	/**
+	 * instance of Reminder
+	 * 
+	 * @see Reminder;
+	 */
+	private Reminder reminder = Reminder.getInstance();
 	
 	Updater() {
 		updates = new ArrayList<Update>();
@@ -103,19 +111,26 @@ public enum Updater {
 
 		SimpleDateFormat format = new SimpleDateFormat("EEEE dd MMMM yyyy");
 
-		FlowPane dateNode = new FlowPane();
+		VBox dateNode = new VBox();
 		dateNode.setAlignment(Pos.CENTER);
 		dateNode.setId("center");
 
-		Text text = new Text(format.format(System.currentTimeMillis()));
+		Text dateLbl = new Text(format.format(System.currentTimeMillis()));
+		Text infoLbl = new Text(reminder.getInfoText());
+		
 
-		text.setTextAlignment(TextAlignment.CENTER);
+		dateLbl.setTextAlignment(TextAlignment.CENTER);
+		infoLbl.setTextAlignment(TextAlignment.CENTER);
 		
-		dateNode.getChildren().addAll(text);
+		dateNode.getChildren().addAll(dateLbl, infoLbl);
 		
-		text.setId("center-text");
-		text.applyCss();
-		text.setFont(Font.font(HeadGirl.getFontSize()));
+		dateLbl.setId("center-text");
+		dateLbl.applyCss();
+		dateLbl.setFont(Font.font(HeadGirl.getFontSize()));	
+		
+		infoLbl.setId("center-text");
+		infoLbl.applyCss();
+		infoLbl.setFont(Font.font(HeadGirl.getFontSize()));	
 		
 		return dateNode;
 	}
